@@ -140,5 +140,9 @@
 
   buildDots();
   showSlide(0);
-  scheduleNext(SLIDE_DURATION_MS);
+  if (slides.length > 1) {
+    scheduleNext(SLIDE_DURATION_MS);
+  } else {
+    progressBar.style.width = "100%";
+  }
 })();

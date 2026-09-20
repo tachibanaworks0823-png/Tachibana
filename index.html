@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Tachibana — Monitor Slideshow</title>
+    <title>Tachibana — モエシリーズ</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -14,152 +14,43 @@
   </head>
   <body>
     <div class="stage" id="stage" aria-live="polite">
-      <!-- Slide 1: Brand -->
-      <section class="slide slide--brand is-active" data-slide="0">
-        <div class="slide__atmosphere slide__atmosphere--brand"></div>
-        <div class="slide__veil"></div>
-        <div class="brand">
-          <p class="brand__mark">CLUB</p>
-          <h1 class="brand__name">Tachibana</h1>
-          <p class="brand__kana">橘</p>
-          <div class="brand__line" aria-hidden="true"></div>
-          <p class="brand__tag">大人の夜を、もっと優雅に。</p>
-        </div>
-      </section>
-
-      <!-- Slide 2: Champagne -->
-      <section class="slide slide--champagne" data-slide="1">
+      <!-- モエシリーズ -->
+      <section class="slide slide--champagne is-active" data-slide="0">
         <div class="slide__atmosphere slide__atmosphere--champagne"></div>
         <div class="slide__veil"></div>
         <div class="slide__content">
           <header class="slide__header">
-            <p class="slide__eyebrow">CHAMPAGNE</p>
-            <h2 class="slide__title">シャンパン</h2>
+            <p class="slide__eyebrow">MOËT &amp; CHANDON</p>
+            <h2 class="slide__title">モエシリーズ</h2>
             <p class="slide__lead">ボトルで祝う、今夜の特別。</p>
           </header>
           <ul class="menu">
             <li class="menu__item">
-              <span class="menu__name">モエ・エ・シャンドン</span>
+              <span class="menu__name">モエシロ</span>
+              <span class="menu__dots" aria-hidden="true"></span>
+              <span class="menu__price">¥20,000</span>
+            </li>
+            <li class="menu__item">
+              <span class="menu__name">モエロゼ</span>
+              <span class="menu__dots" aria-hidden="true"></span>
+              <span class="menu__price">¥25,000</span>
+            </li>
+            <li class="menu__item">
+              <span class="menu__name">モエ黒</span>
               <span class="menu__dots" aria-hidden="true"></span>
               <span class="menu__price">¥30,000</span>
             </li>
             <li class="menu__item">
-              <span class="menu__name">ヴーヴ・クリコ</span>
+              <span class="menu__name">モエアイス</span>
               <span class="menu__dots" aria-hidden="true"></span>
               <span class="menu__price">¥35,000</span>
             </li>
-            <li class="menu__item">
-              <span class="menu__name">ドン・ペリニヨン</span>
-              <span class="menu__dots" aria-hidden="true"></span>
-              <span class="menu__price">¥80,000</span>
-            </li>
             <li class="menu__item menu__item--featured">
-              <span class="menu__name">アルマンド ゴールド</span>
+              <span class="menu__name">モエピカ</span>
               <span class="menu__dots" aria-hidden="true"></span>
-              <span class="menu__price">¥120,000</span>
-            </li>
-            <li class="menu__item menu__item--featured">
-              <span class="menu__name">アルマンド ロゼ</span>
-              <span class="menu__dots" aria-hidden="true"></span>
-              <span class="menu__price">¥150,000</span>
+              <span class="menu__price">¥40,000</span>
             </li>
           </ul>
-        </div>
-      </section>
-
-      <!-- Slide 3: System -->
-      <section class="slide slide--system" data-slide="2">
-        <div class="slide__atmosphere slide__atmosphere--system"></div>
-        <div class="slide__veil"></div>
-        <div class="slide__content">
-          <header class="slide__header">
-            <p class="slide__eyebrow">SYSTEM</p>
-            <h2 class="slide__title">システム</h2>
-            <p class="slide__lead">初めての方も安心の料金体系。</p>
-          </header>
-          <div class="system">
-            <div class="system__block">
-              <p class="system__label">セット料金</p>
-              <p class="system__value">¥8,000<span class="system__unit">／60分</span></p>
-              <p class="system__note">指名料・場内料金込み</p>
-            </div>
-            <div class="system__divider" aria-hidden="true"></div>
-            <ul class="system__list">
-              <li>
-                <span>延長</span>
-                <span>¥4,000／30分</span>
-              </li>
-              <li>
-                <span>本指名</span>
-                <span>¥3,000</span>
-              </li>
-              <li>
-                <span>場内指名</span>
-                <span>¥2,000</span>
-              </li>
-              <li>
-                <span>税・サービス料</span>
-                <span>別途</span>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </section>
-
-      <!-- Slide 4: Drink -->
-      <section class="slide slide--drink" data-slide="3">
-        <div class="slide__atmosphere slide__atmosphere--drink"></div>
-        <div class="slide__veil"></div>
-        <div class="slide__content">
-          <header class="slide__header">
-            <p class="slide__eyebrow">DRINK</p>
-            <h2 class="slide__title">ドリンク</h2>
-            <p class="slide__lead">グラスで愉しむ定番ラインナップ。</p>
-          </header>
-          <ul class="menu menu--compact">
-            <li class="menu__item">
-              <span class="menu__name">焼酎・ウイスキー・ブランデー</span>
-              <span class="menu__dots" aria-hidden="true"></span>
-              <span class="menu__price">¥1,000〜</span>
-            </li>
-            <li class="menu__item">
-              <span class="menu__name">カクテル・サワー</span>
-              <span class="menu__dots" aria-hidden="true"></span>
-              <span class="menu__price">¥1,200</span>
-            </li>
-            <li class="menu__item">
-              <span class="menu__name">生ビール・ワイン</span>
-              <span class="menu__dots" aria-hidden="true"></span>
-              <span class="menu__price">¥1,500</span>
-            </li>
-            <li class="menu__item">
-              <span class="menu__name">ソフトドリンク</span>
-              <span class="menu__dots" aria-hidden="true"></span>
-              <span class="menu__price">¥800</span>
-            </li>
-            <li class="menu__item">
-              <span class="menu__name">ボトルキープ（焼酎）</span>
-              <span class="menu__dots" aria-hidden="true"></span>
-              <span class="menu__price">¥5,000〜</span>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <!-- Slide 5: Notice -->
-      <section class="slide slide--notice" data-slide="4">
-        <div class="slide__atmosphere slide__atmosphere--notice"></div>
-        <div class="slide__veil"></div>
-        <div class="notice">
-          <p class="slide__eyebrow">INFORMATION</p>
-          <h2 class="slide__title">ご案内</h2>
-          <ul class="notice__list">
-            <li>営業時間 20:00 — LAST 01:00</li>
-            <li>定休日 日曜・祝日</li>
-            <li>クレジットカード各種対応</li>
-            <li>完全予約制ではございません</li>
-          </ul>
-          <p class="notice__brand">Tachibana</p>
         </div>
       </section>
     </div>
@@ -169,7 +60,7 @@
         <div class="progress__bar" id="progressBar"></div>
       </div>
       <div class="dots" id="dots"></div>
-      <p class="hint">Space / ← → で操作 · F で全画面</p>
+      <p class="hint">Space で一時停止 · F で全画面</p>
     </div>
 
     <script src="app.js"></script>
