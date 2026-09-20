@@ -1,0 +1,15 @@
+
+.stage{position:relative;width:100%;height:100%}
+.bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:brightness(.25)}
+.shade{position:absolute;inset:0;background:rgba(6,4,3,.6)}
+.frame{position:absolute;inset:3.5vh 3.5vw;border:1px solid var(--gold);padding:3vh 3vw;display:flex;flex-direction:column;justify-content:center;overflow:hidden}
+.corner{position:absolute;height:42%;opacity:.22;object-fit:contain}
+.tl{left:-1%;top:4%;transform:rotate(-12deg)}
+.br{right:-2%;bottom:-4%;height:48%;transform:rotate(8deg)}
+.maison,.title{position:relative;z-index:1;text-align:center}
+.mid{position:relative;z-index:1;margin-top:2vh;display:grid;grid-template-columns:28% 1fr;gap:2vw;align-items:center}
+.mid>img{height:55vh;margin:0 auto;filter:drop-shadow(0 20px 35px rgba(0,0,0,.45))}
+.list{display:flex;flex-direction:column;gap:1vh}
+.row{display:flex;justify-content:space-between;align-items:flex-end;gap:1rem;border-bottom:1px solid rgba(226,180,92,.28);padding-bottom:.85vh}
+.row .nick{font-size:clamp(1.7rem,3.2vw,2.8rem)}
+.row .price{font-size:clamp(1.8rem,3.4vw,3rem)}

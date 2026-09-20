@@ -1,0 +1,11 @@
+
+.stage{position:relative;width:100%;height:100%;background:#060208;overflow:hidden}
+.glow{position:absolute;right:10%;top:15%;width:55vw;height:55vw;background:radial-gradient(circle,rgba(255,70,90,.32),rgba(255,140,50,.12),transparent 70%)}
+.hero{position:absolute;right:-5%;bottom:-8%;height:112%;z-index:1;transform:rotate(5deg);filter:drop-shadow(0 0 55px rgba(255,80,90,.45))}
+.l{position:absolute;right:28%;bottom:0;height:65%;opacity:.3;z-index:0}
+.panel{position:absolute;left:0;top:0;bottom:0;width:min(55vw,760px);z-index:2;padding:4vh 3.5vw;display:flex;flex-direction:column;justify-content:center;background:linear-gradient(90deg,rgba(6,2,8,.97) 72%,transparent)}
+.maison{color:#ff8fa3}
+.list{margin-top:2vh;display:flex;flex-direction:column;gap:1.1vh}
+.row{display:flex;justify-content:space-between;align-items:flex-end;gap:1rem;border-bottom:2px solid rgba(255,120,140,.25);padding-bottom:1vh}
+.price{color:#ffc3a8}
+.is-hot .nick,.is-hot .price{color:#fff;text-shadow:0 0 18px rgba(255,100,110,.6)}
