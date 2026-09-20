@@ -1,7 +1,7 @@
 
 :root{
-  --bg:#070504;--ink:#f6eee3;--muted:rgba(246,238,227,.68);--faint:rgba(246,238,227,.4);
-  --gold:#c9a15d;--gold2:#edd6a4;--rose:#c47a7a;
+  --bg:#050303;--ink:#fff8ef;--muted:rgba(255,248,239,.75);--faint:rgba(255,248,239,.45);
+  --gold:#e0b45a;--gold2:#ffe6a8;--hot:#ff6b6b;
   --serif:"Cormorant Garamond","Shippori Mincho",serif;
   --jp:"Shippori Mincho","Cormorant Garamond",serif;
   --sans:"Zen Kaku Gothic New",system-ui,sans-serif;
@@ -9,12 +9,7 @@
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--ink);font-family:var(--jp);-webkit-font-smoothing:antialiased}
 img{display:block;max-width:100%}
-.back,.badge{position:fixed;z-index:100;font-family:var(--sans);font-size:11px;letter-spacing:.12em;text-decoration:none;color:rgba(246,238,227,.55);background:rgba(0,0,0,.45);backdrop-filter:blur(8px);border:1px solid rgba(201,161,93,.25);padding:.45rem .7rem}
-.back{top:12px;left:12px}
-.badge{top:12px;right:12px;color:var(--gold2)}
-.back:hover{color:var(--gold2)}
-body.shot .back,
-body.shot .badge{display:none !important}
-@media (max-width:800px){
-  html,body{overflow:auto;height:auto;min-height:100%}
-}
+.back,.badge{position:fixed;z-index:100;font-family:var(--sans);font-size:11px;letter-spacing:.12em;text-decoration:none;color:rgba(255,248,239,.55);background:rgba(0,0,0,.45);backdrop-filter:blur(8px);border:1px solid rgba(224,180,90,.3);padding:.45rem .7rem}
+.back{top:12px;left:12px}.badge{top:12px;right:12px;color:var(--gold2)}
+body.shot .back,body.shot .badge,html.shot .back,html.shot .badge{display:none!important}
+@media(max-width:800px){html,body{overflow:auto;height:auto;min-height:100%}}

@@ -1,0 +1,15 @@
+
+.stage{display:grid;grid-template-columns:1.05fr 1fr;height:100%;background:#070403}
+.visual{position:relative;overflow:hidden;background:radial-gradient(ellipse at 40% 60%,rgba(224,180,90,.2),transparent 55%),#0c0806}
+.b1{position:absolute;left:2%;bottom:-5%;height:85%;opacity:.55;transform:rotate(-10deg);filter:brightness(.7)}
+.b2{position:absolute;left:18%;bottom:-8%;height:105%;filter:drop-shadow(0 20px 50px rgba(0,0,0,.6))}
+.menu{padding:4vh 3.5vw;display:flex;flex-direction:column;justify-content:center;background:linear-gradient(90deg,#120c09,#070403)}
+.maison{font-family:var(--serif);letter-spacing:.45em;color:var(--gold);font-size:clamp(1rem,1.4vw,1.25rem)}
+h1{font-size:clamp(3rem,6vw,5.2rem);letter-spacing:.14em;font-weight:700;line-height:.95;margin:.3rem 0 2vh}
+.list{display:flex;flex-direction:column;gap:clamp(.9rem,2vh,1.5rem)}
+.row{display:flex;justify-content:space-between;align-items:flex-end;gap:1rem;border-bottom:2px solid rgba(224,180,90,.25);padding-bottom:.75rem}
+.nick{font-size:clamp(2.3rem,4.2vw,3.6rem);font-weight:700;letter-spacing:.1em}
+.formal{margin-top:.3rem;font-size:clamp(1.25rem,2vw,1.75rem);color:var(--muted)}
+.price{font-family:var(--serif);font-size:clamp(2.4rem,4.4vw,3.8rem);font-weight:700;color:var(--gold)}
+.is-hot .nick,.is-hot .price{color:var(--gold2)}
+@media(max-width:900px){.stage{grid-template-columns:1fr}.visual{min-height:40vh}}
