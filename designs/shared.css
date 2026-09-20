@@ -14,7 +14,7 @@ body.shot .back,body.shot .badge,html.shot .back,html.shot .badge{display:none!i
 .maison{font-family:var(--serif);letter-spacing:.42em;color:var(--gold);font-size:clamp(1rem,1.5vw,1.3rem);font-weight:600}
 .title{font-size:clamp(2.6rem,5.5vw,4.6rem);letter-spacing:.16em;font-weight:700;line-height:1.05}
 .nick{font-size:clamp(2rem,4vw,3.5rem);font-weight:700;letter-spacing:.1em;line-height:1.05}
-.formal{margin-top:.3rem;font-size:clamp(1.15rem,1.9vw,1.7rem);color:var(--muted);letter-spacing:.05em}
+.formal{margin-top:.3rem;font-size:clamp(1.15rem,1.9vw,1.7rem);color:var(--muted);letter-spacing:.05em;line-height:1.35}
 .price{font-family:var(--serif);font-size:clamp(2.1rem,4.2vw,3.7rem);font-weight:700;color:var(--gold);line-height:1;white-space:nowrap}
 .is-hot .nick,.is-hot .price{color:var(--gold2)}
 @media(max-width:800px){html,body{overflow:auto;height:auto;min-height:100%}}
