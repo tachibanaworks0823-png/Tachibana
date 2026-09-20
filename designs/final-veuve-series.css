@@ -13,10 +13,10 @@
 .panel .title-zone{flex:0 0 22%;display:flex;align-items:flex-start;padding-top:4.5vh;min-height:0}
 .panel .title{position:static;margin:0;transform:none;left:auto;right:auto;top:auto;font-size:clamp(1.9rem,3.6vw,3.2rem);letter-spacing:.2em;white-space:nowrap}
 .list{flex:1;margin-top:0;display:flex;flex-direction:column;justify-content:center;gap:2.4vh;min-height:0;width:100%}
-.list .nick{white-space:nowrap;font-size:clamp(1.45rem,2.7vw,2.45rem);letter-spacing:.04em;overflow:hidden;text-overflow:ellipsis}
-.row{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:end;column-gap:1.6rem;width:100%;border-bottom:3px solid rgba(226,180,92,.45);padding-bottom:1.4vh}
-.row>div{min-width:0;overflow:hidden}
-.list .price{justify-self:end;text-align:right;white-space:nowrap;min-width:6.8em;font-variant-numeric:tabular-nums;font-feature-settings:"tnum";margin:0}
+.list .nick{white-space:nowrap;font-size:clamp(1.35rem,2.35vw,2.15rem);letter-spacing:.04em}
+.row{display:grid;grid-template-columns:minmax(0,1fr) 8.5em;align-items:end;column-gap:1.2rem;width:100%;border-bottom:3px solid rgba(226,180,92,.45);padding-bottom:1.4vh}
+.row>div{min-width:0}
+.list .price{justify-self:end;text-align:right;width:100%;white-space:nowrap;font-variant-numeric:tabular-nums;font-feature-settings:"tnum";margin:0}
 .panel::before{content:"";position:absolute;left:0;top:12%;bottom:12%;width:2px;background:linear-gradient(180deg,transparent,var(--gold),transparent)}
 .ghost{display:none}.floor{display:none}
 
