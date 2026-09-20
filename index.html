@@ -1,99 +1,163 @@
 <!DOCTYPE html>
 <html lang="ja">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Tachibana — モエシリーズ</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Shippori+Mincho:wght@400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
-    <link rel="stylesheet" href="styles.css" />
-  </head>
-  <body>
-    <div class="stage" id="stage" aria-live="polite">
-      <section class="slide slide--moet is-active" data-slide="0">
-        <div class="bleed">
-          <img class="bleed__img" src="assets/moet/moet-bg.png" alt="" />
-        </div>
-        <div class="bleed__shade" aria-hidden="true"></div>
-
-        <!-- Layered bottle drama — not a product grid -->
-        <div class="drama" aria-hidden="true">
-          <img class="drama__bottle drama__bottle--back" src="assets/moet/cut/rose.png" alt="" />
-          <img class="drama__bottle drama__bottle--mid" src="assets/moet/cut/ice.png" alt="" />
-          <img class="drama__bottle drama__bottle--front" src="assets/moet/cut/pika.png" alt="" />
-          <div class="drama__haze"></div>
-        </div>
-
-        <div class="sheet">
-          <header class="sheet__head">
-            <p class="sheet__maison">MOËT &amp; CHANDON</p>
-            <h1 class="sheet__title">モエシリーズ</h1>
-            <p class="sheet__lead">今夜を祝う、5つの表情。</p>
-          </header>
-
-          <ul class="list">
-            <li class="list__row">
-              <div class="list__copy">
-                <p class="list__nick">モエシロ</p>
-                <p class="list__formal">モエ・エ・シャンドン ブリュット アンペリアル</p>
-                <p class="list__en">Brut Impérial</p>
-              </div>
-              <span class="list__rule" aria-hidden="true"></span>
-              <p class="list__price">¥20,000</p>
-            </li>
-            <li class="list__row">
-              <div class="list__copy">
-                <p class="list__nick">モエロゼ</p>
-                <p class="list__formal">モエ・エ・シャンドン ロゼ アンペリアル</p>
-                <p class="list__en">Rosé Impérial</p>
-              </div>
-              <span class="list__rule" aria-hidden="true"></span>
-              <p class="list__price">¥25,000</p>
-            </li>
-            <li class="list__row">
-              <div class="list__copy">
-                <p class="list__nick">モエ黒</p>
-                <p class="list__formal">モエ・エ・シャンドン ネクター アンペリアル</p>
-                <p class="list__en">Nectar Impérial</p>
-              </div>
-              <span class="list__rule" aria-hidden="true"></span>
-              <p class="list__price">¥30,000</p>
-            </li>
-            <li class="list__row">
-              <div class="list__copy">
-                <p class="list__nick">モエアイス</p>
-                <p class="list__formal">モエ・エ・シャンドン アイス アンペリアル</p>
-                <p class="list__en">Ice Impérial</p>
-              </div>
-              <span class="list__rule" aria-hidden="true"></span>
-              <p class="list__price">¥35,000</p>
-            </li>
-            <li class="list__row list__row--feature">
-              <div class="list__copy">
-                <p class="list__nick">モエピカ</p>
-                <p class="list__formal">モエ・エ・シャンドン ネクター アンペリアル ロゼ ドライ</p>
-                <p class="list__en">N.I.R · Nectar Impérial Rosé Dry</p>
-              </div>
-              <span class="list__rule" aria-hidden="true"></span>
-              <p class="list__price">¥40,000</p>
-            </li>
-          </ul>
-        </div>
-      </section>
-    </div>
-
-    <div class="chrome" aria-hidden="true">
-      <div class="progress">
-        <div class="progress__bar" id="progressBar"></div>
-      </div>
-      <div class="dots" id="dots"></div>
-      <p class="hint">Space で一時停止 · F で全画面</p>
-    </div>
-
-    <script src="app.js"></script>
-  </body>
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Tachibana — モエシリーズ デザイン案（21種）</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600&family=Shippori+Mincho:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+:root{--bg:#0a0806;--ink:#f6eee3;--gold:#c9a15d;--muted:rgba(246,238,227,.6)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-family:"Zen Kaku Gothic New",system-ui,sans-serif;padding:3rem 4vw 4rem}
+header{max-width:1100px;margin:0 auto 2.5rem}
+.eyebrow{font-family:"Cormorant Garamond",serif;letter-spacing:.4em;color:var(--gold);font-size:.85rem}
+h1{font-family:"Shippori Mincho",serif;font-size:clamp(1.8rem,4vw,2.8rem);letter-spacing:.18em;margin:.6rem 0}
+.sub{color:var(--muted);line-height:1.7;max-width:40rem}
+.hint{margin-top:1rem;font-size:.85rem;color:rgba(246,238,227,.45)}
+.grid{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1rem}
+.card{display:flex;flex-direction:column;gap:.45rem;padding:1.25rem 1.15rem;border:1px solid rgba(201,161,93,.25);
+  text-decoration:none;color:inherit;background:rgba(255,255,255,.02);transition:border-color .2s,transform .2s}
+.card:hover{border-color:var(--gold);transform:translateY(-2px)}
+.num{font-size:.7rem;letter-spacing:.2em;color:var(--gold)}
+strong{font-family:"Shippori Mincho",serif;font-size:1.15rem;letter-spacing:.08em;font-weight:600}
+.desc{font-size:.8rem;color:var(--muted);line-height:1.5;flex:1}
+.open{font-size:.75rem;color:var(--gold);margin-top:.5rem}
+.card:first-child{border-color:rgba(237,214,164,.55);background:rgba(201,161,93,.06)}
+</style>
+</head>
+<body>
+<header>
+  <p class="eyebrow">TACHIBANA · REVIEW</p>
+  <h1>モエシリーズ デザイン案</h1>
+  <p class="sub">デザイン1（ワインリスト）をベースに、全21案を用意しました。カードをクリックして各案を全画面で確認できます。各デザイン内では ← → で前後の案へ移動、Esc / G でギャラリーに戻ります。</p>
+  <p class="hint">採用したい番号を教えてください。</p>
+</header>
+<nav class="grid">
+        <a class="card" href="designs/01-winelist.html">
+          <span class="num">DESIGN 01</span>
+          <strong>ワインリスト</strong>
+          <span class="desc">左にボトル、右に価格表のエディトリアル</span>
+          <span class="open">開く →</span>
+        </a>
+        <a class="card" href="designs/02-hero-nir.html">
+          <span class="num">DESIGN 02</span>
+          <strong>ヒーローNIR</strong>
+          <span class="desc">ピカを全面に、下に価格オーバーレイ</span>
+          <span class="open">開く →</span>
+        </a>
+        <a class="card" href="designs/03-type-poster.html">
+          <span class="num">DESIGN 03</span>
+          <strong>タイポポスター</strong>
+          <span class="desc">巨大文字が主役、ボトルは透かし</span>
+          <span class="open">開く →</span>
+        </a>
+        <a class="card" href="designs/04-art-deco.html">
+          <span class="num">DESIGN 04</span>
+          <strong>アールデコ</strong>
+          <span class="desc">幾何学フレームと中央リスト</span>
+          <span class="open">開く →</span>
+        </a>
+        <a class="card" href="designs/05-spotlight.html">
+          <span class="num">DESIGN 05</span>
+          <strong>スポットライト</strong>
+          <span class="desc">中央に1本、左右に価格</span>
+          <span class="open">開く →</span>
+        </a>
+        <a class="card" href="designs/06-filmstrip.html">
+          <span class="num">DESIGN 06</span>
+          <strong>フィルムストリップ</strong>
+          <span class="desc">縦に5本を帯状、横にリスト</span>
+          <span class="open">開く →</span>
+        </a>
+        <a class="card" href="designs/07-cascade.html">
+          <span class="num">DESIGN 07</span>
+          <strong>カスケード</strong>
+          <span class="desc">斜めに階段状のボトル配置</span>
+          <span class="open">開く →</span>
+        </a>
+        <a class="card" href="designs/08-gold-plate.html">
+          <span class="num">DESIGN 08</span>
+          <strong>ゴールドプレート</strong>
+          <span class="desc">銘板メニュー風の中央パネル</span>
+          <span class="open">開く →</span>
+        </a>
+        <a class="card" href="designs/09-luminous.html">
+          <span class="num">DESIGN 09</span>
+          <strong>ルミナス</strong>
+          <span class="desc">ネオン感のあるナイトライフ</span>
+          <span class="open">開く →</span>
+        </a>
+        <a class="card" href="designs/10-price-hero.html">
+          <span class="num">DESIGN 10</span>
+          <strong>プライスヒーロー</strong>
+          <span class="desc">価格の数字を大きく見せる</span>
+          <span class="open">開く →</span>
+        </a>
+        <a class="card" href="designs/11-mirror.html">
+          <span class="num">DESIGN 11</span>
+          <strong>ミラーフロア</strong>
+          <span class="desc">反射床の演出と立ちボトル</span>
+          <span class="open">開く →</span>
+        </a>
+        <a class="card" href="designs/12-glass-panel.html">
+          <span class="num">DESIGN 12</span>
+          <strong>ガラスパネル</strong>
+          <span class="desc">半透明パネルにメニュー</span>
+          <span class="open">開く →</span>
+        </a>
+        <a class="card" href="designs/13-tate-gaki.html">
+          <span class="num">DESIGN 13</span>
+          <strong>縦書きアクセント</strong>
+          <span class="desc">和の縦書きとボトル</span>
+          <span class="open">開く →</span>
+        </a>
+        <a class="card" href="designs/14-club-led.html">
+          <span class="num">DESIGN 14</span>
+          <strong>クラブLED</strong>
+          <span class="desc">LEDバーとダーククラブ感</span>
+          <span class="open">開く →</span>
+        </a>
+        <a class="card" href="designs/15-silk.html">
+          <span class="num">DESIGN 15</span>
+          <strong>シルク</strong>
+          <span class="desc">柔らかい光と浮动リスト</span>
+          <span class="open">開く →</span>
+        </a>
+        <a class="card" href="designs/16-brutal.html">
+          <span class="num">DESIGN 16</span>
+          <strong>ブルータル</strong>
+          <span class="desc">極端なトリミングと大文字</span>
+          <span class="open">開く →</span>
+        </a>
+        <a class="card" href="designs/17-ornate-frame.html">
+          <span class="num">DESIGN 17</span>
+          <strong>オーネイトフレーム</strong>
+          <span class="desc">金の二重枠と余白</span>
+          <span class="open">開く →</span>
+        </a>
+        <a class="card" href="designs/18-diptych.html">
+          <span class="num">DESIGN 18</span>
+          <strong>ディプティク</strong>
+          <span class="desc">アイスとピカの二面、中央リスト</span>
+          <span class="open">開く →</span>
+        </a>
+        <a class="card" href="designs/19-ledger.html">
+          <span class="num">DESIGN 19</span>
+          <strong>レジャー</strong>
+          <span class="desc">表形式の上品な料金表</span>
+          <span class="open">開く →</span>
+        </a>
+        <a class="card" href="designs/20-orbit.html">
+          <span class="num">DESIGN 20</span>
+          <strong>オービット</strong>
+          <span class="desc">円弧にボトル、中央にタイトル</span>
+          <span class="open">開く →</span>
+        </a>
+        <a class="card" href="designs/21-manifesto.html">
+          <span class="num">DESIGN 21</span>
+          <strong>マニフェスト</strong>
+          <span class="desc">宣言文ポスター＋透かしボトル</span>
+          <span class="open">開く →</span>
+        </a></nav>
+</body>
 </html>

@@ -1,0 +1,16 @@
+
+.stage{width:100%;height:100%;background:#05050a;padding:4vh 3vw;display:flex;flex-direction:column;
+  background-image:linear-gradient(180deg,rgba(80,40,120,.15),transparent 40%)}
+.leds{position:absolute;left:0;right:0;top:0;height:6px;background:linear-gradient(90deg,#ff2d55,#ffcc00,#00e5ff,#ff2d55);background-size:200% 100%;animation:led 4s linear infinite}
+@keyframes led{to{background-position:200% 0}}
+header{text-align:center;margin:2vh 0 3vh;position:relative;z-index:1}
+.maison{font-family:var(--sans);letter-spacing:.4em;color:#00e5ff;font-size:.7rem}
+h1{font-size:clamp(2rem,4.5vw,3.2rem);letter-spacing:.2em;margin-top:.4rem}
+.row5{flex:1;display:grid;grid-template-columns:repeat(5,1fr);gap:1vw;align-items:end;position:relative;z-index:1}
+.item{text-align:center;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);padding:2vh 1vw 2.5vh;border-radius:4px}
+.item img{height:38vh;margin:0 auto 1rem;filter:drop-shadow(0 0 20px rgba(0,229,255,.15))}
+.n{letter-spacing:.12em;font-size:.95rem}
+.p{font-family:var(--serif);color:#ffcc66;font-size:1.25rem;margin-top:.35rem}
+.item:last-child{border-color:rgba(255,45,85,.45);box-shadow:0 0 30px rgba(255,45,85,.15)}
+.item:last-child .p{color:#ff8aa0}
+@media(max-width:800px){.row5{grid-template-columns:1fr 1fr}.item img{height:22vh}}

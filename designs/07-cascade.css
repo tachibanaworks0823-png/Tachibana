@@ -1,0 +1,19 @@
+
+.stage{position:relative;width:100%;height:100%}
+.bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:brightness(.4)}
+.cascade{position:absolute;left:0;right:40%;top:0;bottom:0;z-index:2}
+.c{position:absolute;height:55vh;object-fit:contain;filter:drop-shadow(0 20px 40px rgba(0,0,0,.6))}
+.c--1{left:2%;top:8%;transform:rotate(-12deg);opacity:.7}
+.c--2{left:12%;top:18%;transform:rotate(-6deg);opacity:.8}
+.c--3{left:22%;top:28%;transform:rotate(0)}
+.c--4{left:32%;top:38%;transform:rotate(5deg)}
+.c--5{left:42%;top:48%;transform:rotate(10deg);height:60vh}
+.rail{position:absolute;right:0;top:0;bottom:0;width:min(42vw,560px);z-index:3;padding:5vh 3vw;display:flex;flex-direction:column;justify-content:center;background:rgba(7,5,4,.72);backdrop-filter:blur(6px)}
+.maison{font-family:var(--serif);letter-spacing:.45em;color:var(--gold);font-size:.75rem}
+h1{font-size:clamp(1.8rem,3.5vw,2.8rem);letter-spacing:.2em;margin:.5rem 0 1.5rem}
+.list{display:flex;flex-direction:column;gap:.8rem}
+.row{display:flex;justify-content:space-between;gap:1rem;align-items:baseline}
+.rule,.formal,.en{display:none}
+.nick{font-size:1rem;letter-spacing:.1em}
+.price{font-family:var(--serif);color:var(--gold);font-size:1.2rem}
+.is-feature .nick,.is-feature .price{color:var(--gold2)}
