@@ -7,48 +7,94 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Zen+Old+Mincho:wght@400;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Shippori+Mincho:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <div class="stage" id="stage" aria-live="polite">
-      <!-- モエシリーズ -->
-      <section class="slide slide--champagne is-active" data-slide="0">
-        <div class="slide__atmosphere slide__atmosphere--champagne"></div>
-        <div class="slide__veil"></div>
-        <div class="slide__content">
-          <header class="slide__header">
-            <p class="slide__eyebrow">MOËT &amp; CHANDON</p>
-            <h2 class="slide__title">モエシリーズ</h2>
-            <p class="slide__lead">ボトルで祝う、今夜の特別。</p>
+      <section class="slide slide--moet is-active" data-slide="0">
+        <div class="slide__photo" style="--photo: url('assets/moet/moet-bg.png')"></div>
+        <div class="slide__glow" aria-hidden="true"></div>
+        <div class="slide__grain" aria-hidden="true"></div>
+
+        <div class="moet">
+          <header class="moet__header">
+            <p class="moet__maison">MOËT &amp; CHANDON</p>
+            <h1 class="moet__title">モエシリーズ</h1>
+            <p class="moet__sub">Champagne Collection</p>
           </header>
-          <ul class="menu">
-            <li class="menu__item">
-              <span class="menu__name">モエシロ</span>
-              <span class="menu__dots" aria-hidden="true"></span>
-              <span class="menu__price">¥20,000</span>
+
+          <ul class="bottles">
+            <li class="bottle">
+              <div class="bottle__frame">
+                <img
+                  class="bottle__img"
+                  src="assets/moet/moet-imperial.png"
+                  alt="モエ・エ・シャンドン ブリュット アンペリアル"
+                />
+              </div>
+              <p class="bottle__nick">モエシロ</p>
+              <p class="bottle__formal">モエ・エ・シャンドン<br />ブリュット アンペリアル</p>
+              <p class="bottle__en">Brut Impérial</p>
+              <p class="bottle__price">¥20,000</p>
             </li>
-            <li class="menu__item">
-              <span class="menu__name">モエロゼ</span>
-              <span class="menu__dots" aria-hidden="true"></span>
-              <span class="menu__price">¥25,000</span>
+
+            <li class="bottle">
+              <div class="bottle__frame">
+                <img
+                  class="bottle__img"
+                  src="assets/moet/moet-rose.png"
+                  alt="モエ・エ・シャンドン ロゼ アンペリアル"
+                />
+              </div>
+              <p class="bottle__nick">モエロゼ</p>
+              <p class="bottle__formal">モエ・エ・シャンドン<br />ロゼ アンペリアル</p>
+              <p class="bottle__en">Rosé Impérial</p>
+              <p class="bottle__price">¥25,000</p>
             </li>
-            <li class="menu__item">
-              <span class="menu__name">モエ黒</span>
-              <span class="menu__dots" aria-hidden="true"></span>
-              <span class="menu__price">¥30,000</span>
+
+            <li class="bottle">
+              <div class="bottle__frame">
+                <img
+                  class="bottle__img"
+                  src="assets/moet/moet-nectar.png"
+                  alt="モエ・エ・シャンドン ネクター アンペリアル"
+                />
+              </div>
+              <p class="bottle__nick">モエ黒</p>
+              <p class="bottle__formal">モエ・エ・シャンドン<br />ネクター アンペリアル</p>
+              <p class="bottle__en">Nectar Impérial</p>
+              <p class="bottle__price">¥30,000</p>
             </li>
-            <li class="menu__item">
-              <span class="menu__name">モエアイス</span>
-              <span class="menu__dots" aria-hidden="true"></span>
-              <span class="menu__price">¥35,000</span>
+
+            <li class="bottle">
+              <div class="bottle__frame">
+                <img
+                  class="bottle__img"
+                  src="assets/moet/moet-ice.png"
+                  alt="モエ・エ・シャンドン アイス アンペリアル"
+                />
+              </div>
+              <p class="bottle__nick">モエアイス</p>
+              <p class="bottle__formal">モエ・エ・シャンドン<br />アイス アンペリアル</p>
+              <p class="bottle__en">Ice Impérial</p>
+              <p class="bottle__price">¥35,000</p>
             </li>
-            <li class="menu__item menu__item--featured">
-              <span class="menu__name">モエピカ</span>
-              <span class="menu__dots" aria-hidden="true"></span>
-              <span class="menu__price">¥40,000</span>
+
+            <li class="bottle bottle--featured">
+              <div class="bottle__frame">
+                <img
+                  class="bottle__img"
+                  src="assets/moet/moet-pika.png"
+                  alt="モエ・エ・シャンドン ネクター アンペリアル ロゼ ドライ"
+                />
+              </div>
+              <p class="bottle__nick">モエピカ</p>
+              <p class="bottle__formal">モエ・エ・シャンドン<br />ネクター アンペリアル ロゼ ドライ</p>
+              <p class="bottle__en">Nectar Impérial Rosé Dry</p>
+              <p class="bottle__price">¥40,000</p>
             </li>
           </ul>
         </div>
