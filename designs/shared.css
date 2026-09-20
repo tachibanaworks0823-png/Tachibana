@@ -13,6 +13,8 @@ img{display:block;max-width:100%}
 .back{top:12px;left:12px}
 .badge{top:12px;right:12px;color:var(--gold2)}
 .back:hover{color:var(--gold2)}
+body.shot .back,
+body.shot .badge{display:none !important}
 @media (max-width:800px){
   html,body{overflow:auto;height:auto;min-height:100%}
 }

@@ -1,3 +1,7 @@
+
+if (new URLSearchParams(location.search).get("shot") === "1") {
+  document.body.classList.add("shot");
+}
 window.DESIGN_FILES = {
   1: "01-winelist.html",
   2: "02-hero-nir.html",
