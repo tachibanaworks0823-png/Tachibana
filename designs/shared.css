@@ -12,7 +12,7 @@ img{display:block;max-width:100%}
 .back{top:10px;left:10px}.badge{top:10px;right:10px;color:var(--gold2)}
 body.shot .back,body.shot .badge,html.shot .back,html.shot .badge{display:none!important}
 .maison{font-family:var(--serif);letter-spacing:.42em;color:var(--gold);font-size:clamp(1rem,1.5vw,1.3rem);font-weight:600}
-.title{font-family:var(--serif);font-size:clamp(1.7rem,3.2vw,2.8rem);letter-spacing:.28em;font-weight:700;line-height:1.1;color:var(--gold);white-space:nowrap}
+.title{font-family:var(--serif);font-size:clamp(2.1rem,3.9vw,3.5rem);letter-spacing:.22em;font-weight:700;line-height:1.1;color:var(--gold);white-space:nowrap}
 .nick{font-size:clamp(2rem,4vw,3.5rem);font-weight:700;letter-spacing:.1em;line-height:1.05}
 .formal{margin-top:.3rem;font-size:clamp(1.15rem,1.9vw,1.7rem);color:var(--muted);letter-spacing:.05em;line-height:1.35}
 .price{font-family:var(--serif);font-size:clamp(2.1rem,4.2vw,3.7rem);font-weight:700;color:var(--gold);line-height:1;white-space:nowrap}

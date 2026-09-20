@@ -10,7 +10,8 @@
 .b5{z-index:4;animation:driftE 9s ease-in-out infinite}
 
 .panel{position:absolute;right:0;top:0;bottom:0;width:min(56vw,800px);z-index:3;padding:3.5vh 3.5vw;display:flex;flex-direction:column;justify-content:center;padding-left:4.2vw}
-.list{margin-top:2vh;display:flex;flex-direction:column;gap:1.2vh}
+.panel .title{position:absolute;left:4.2vw;right:3.5vw;top:14%;margin:0;transform:translateY(-50%)}
+.list{margin-top:6vh;display:flex;flex-direction:column;gap:1.2vh}
 .row{display:flex;justify-content:space-between;align-items:flex-end;gap:1rem;border-bottom:3px solid rgba(226,180,92,.45);padding-bottom:1vh}
 .is-hot{border-bottom-color:var(--gold2)}
 .panel::before{content:"";position:absolute;left:0;top:12%;bottom:12%;width:2px;background:linear-gradient(180deg,transparent,var(--gold),transparent)}
