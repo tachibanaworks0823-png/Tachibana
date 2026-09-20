@@ -109,13 +109,11 @@ body.is-interactive {
 }
 
 .drama__bottle--back {
-  width: min(38vw, 340px);
-  left: 2%;
-  bottom: 4%;
-  opacity: 0;
-  transform: rotate(-8deg) translateY(40px);
-  filter: drop-shadow(0 30px 50px rgba(0, 0, 0, 0.65)) brightness(0.55) saturate(0.8);
+  width: min(34vw, 300px);
+  left: 0%;
+  bottom: 6%;
   z-index: 1;
+  filter: drop-shadow(0 30px 50px rgba(0, 0, 0, 0.65)) brightness(0.5) saturate(0.75) blur(0.3px);
 }
 
 .slide.is-active .drama__bottle--back {
@@ -124,11 +122,11 @@ body.is-interactive {
 }
 
 .drama__bottle--mid {
-  width: min(42vw, 380px);
-  left: 14%;
-  bottom: 2%;
+  width: min(40vw, 360px);
+  left: 10%;
+  bottom: 3%;
   z-index: 2;
-  filter: drop-shadow(0 30px 50px rgba(0, 0, 0, 0.65)) brightness(0.75);
+  filter: drop-shadow(0 30px 50px rgba(0, 0, 0, 0.7)) brightness(0.82);
 }
 
 .slide.is-active .drama__bottle--mid {
@@ -137,10 +135,11 @@ body.is-interactive {
 }
 
 .drama__bottle--front {
-  width: min(46vw, 430px);
-  left: 28%;
-  bottom: -2%;
+  width: min(48vw, 460px);
+  left: 22%;
+  bottom: -4%;
   z-index: 3;
+  filter: drop-shadow(0 40px 60px rgba(0, 0, 0, 0.75));
 }
 
 .slide.is-active .drama__bottle--front {
