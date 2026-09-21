@@ -1,13 +1,9 @@
 .stage{position:relative;width:100%;height:100%}
 .bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:brightness(.32)}
 .shade{position:absolute;inset:0;z-index:1}
-.drama{position:absolute;left:0;top:0;bottom:0;width:78%;z-index:2;pointer-events:none;overflow:visible}
+.drama{position:absolute;left:0;top:0;bottom:0;width:62%;z-index:2;pointer-events:none;overflow:visible}
 .b{position:absolute;object-fit:contain;filter:drop-shadow(0 30px 60px rgba(0,0,0,.75));will-change:transform}
-.b1{z-index:1;animation:driftA 7.5s ease-in-out infinite}
-.b2{z-index:2;animation:driftB 8.5s ease-in-out infinite}
-.b3{z-index:3;animation:driftC 6.8s ease-in-out infinite}
-.b4{z-index:5;animation:driftD 7.2s ease-in-out infinite}
-.b5{z-index:4;animation:driftE 9s ease-in-out infinite}
+.b4{z-index:6;animation:driftD 7.2s ease-in-out infinite}
 
 .panel{position:absolute;right:0;top:0;bottom:0;width:min(56vw,800px);z-index:3;padding:0 4vw 6vh 4.2vw;display:flex;flex-direction:column}
 .panel .title-zone{flex:0 0 22%;display:flex;align-items:flex-start;padding-top:4.5vh;min-height:0}
@@ -20,16 +16,9 @@
 .panel::before{content:"";position:absolute;left:0;top:12%;bottom:12%;width:2px;background:linear-gradient(180deg,transparent,var(--gold),transparent)}
 .ghost{display:none}.floor{display:none}
 
-@keyframes driftA{0%,100%{transform:rotate(var(--r1,-12deg)) translate3d(0,0,0)}50%{transform:rotate(calc(var(--r1,-12deg) + 2deg)) translate3d(1.4%,-1.5%,0)}}
-@keyframes driftB{0%,100%{transform:rotate(var(--r2,5deg)) translate3d(0,0,0)}50%{transform:rotate(calc(var(--r2,5deg) - 1.5deg)) translate3d(-.9%,-2%,0)}}
-@keyframes driftC{0%,100%{transform:rotate(var(--r3,-3deg)) translate3d(0,0,0)}50%{transform:rotate(calc(var(--r3,-3deg) + 1.5deg)) translate3d(1%,-2.2%,0)}}
-@keyframes driftD{0%,100%{transform:rotate(var(--r4,2deg)) translate3d(0,0,0) scale(1)}50%{transform:rotate(calc(var(--r4,2deg) - 1deg)) translate3d(-.7%,-2.6%,0) scale(1.025)}}
-@keyframes driftE{0%,100%{transform:rotate(var(--r5,-7deg)) translate3d(0,0,0)}50%{transform:rotate(calc(var(--r5,-7deg) + 2deg)) translate3d(1.5%,-1.6%,0)}}
-@media (prefers-reduced-motion:reduce){.b1,.b2,.b3,.b4,.b5{animation:none!important}}
+@keyframes driftD{0%,100%{transform:rotate(var(--r4,0deg)) translate3d(0,0,0) scale(1)}50%{transform:rotate(calc(var(--r4,0deg) - .8deg)) translate3d(-.5%,-1.8%,0) scale(1.015)}}
+@media (prefers-reduced-motion:reduce){.b4{animation:none!important}}
 
-.shade{background:linear-gradient(100deg,rgba(6,4,3,.04) 0%,rgba(6,4,3,.3) 34%,rgba(6,4,3,.8) 58%,rgba(6,4,3,.96) 72%)}
-.b1{left:-10%;bottom:-20%;height:88%;opacity:.16;--r1:-12deg;transform:rotate(-12deg)}
-.b2{left:6%;bottom:-14%;height:102%;opacity:.88;--r2:5deg;transform:rotate(5deg);z-index:4}
-.b3{left:20%;bottom:-10%;height:108%;opacity:1;--r3:-2deg;transform:rotate(-2deg);z-index:5}
-.b4{left:38%;bottom:-8%;height:112%;opacity:1;--r4:2deg;transform:rotate(2deg);z-index:6;filter:drop-shadow(0 0 40px rgba(226,180,92,.35)) drop-shadow(0 30px 60px rgba(0,0,0,.75))}
-.b5{display:none}
+.shade{background:linear-gradient(100deg,rgba(6,4,3,.04) 0%,rgba(6,4,3,.28) 36%,rgba(6,4,3,.82) 58%,rgba(6,4,3,.97) 72%)}
+/* 浮き輪付きRichのみ — 円全体が画面内 */
+.b4{left:2%;bottom:2%;height:94%;width:58%;opacity:1;--r4:0deg;transform:rotate(0deg);filter:drop-shadow(0 0 55px rgba(226,180,92,.45)) drop-shadow(0 28px 55px rgba(0,0,0,.8))}
