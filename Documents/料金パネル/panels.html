@@ -54,13 +54,27 @@
   .photo-hero { height: 52%; }
   .photo-mist { height: 46%; }
   .dual-photo { height: 50%; }
-  .p10 .dual-photo { height: 52%; }
-  .p10 .dual-photo img { object-position: center 12%; }
-  .p10 .dual-body { padding-top: 4px; padding-bottom: 8px; }
-  .p10 .brand-en { margin-top: 4px !important; font-size: 42px !important; }
-  .p10 .divider { margin: 10px 0 !important; }
-  .p10 .price-row { padding: 12px 8px !important; }
-  .p10 .tax { margin-bottom: 28px; }
+  .p10 .dual-photo { height: 58%; flex-shrink: 0; }
+  .p10 .dual-photo img { object-position: center 10%; }
+  .p10 .dual-photo .photo-fade {
+    height: 22%;
+    background: linear-gradient(180deg, transparent, rgba(255,255,255,0.85) 55%, #fff);
+  }
+  .p10 .dual-body {
+    flex: 1 1 auto;
+    justify-content: flex-start;
+    gap: 0;
+    padding: 6px 56px 20px !important;
+  }
+  .p10 .brand-en { margin-top: 2px !important; font-size: 40px !important; }
+  .p10 .brand-jp { font-size: 14px; }
+  .p10 .divider { margin: 8px 0 !important; }
+  .p10 .system { font-size: 16px; }
+  .p10 .unit { margin-top: 6px; font-size: 16px; }
+  .p10 .prices { margin-top: 10px !important; gap: 0 !important; width: 82%; }
+  .p10 .price-row { padding: 10px 8px !important; }
+  .p10 .price-row .p { font-size: 30px !important; }
+  .p10 .tax { margin-top: auto; margin-bottom: 24px; }
   .split-photo { height: 44%; border-bottom: 1px solid #e4e6ea; }
   .mag-photo { height: 34%; }
   .photo-inset {
