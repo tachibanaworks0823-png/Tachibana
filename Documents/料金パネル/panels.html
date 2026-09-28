@@ -54,7 +54,7 @@
   .photo-hero { height: 52%; }
   .photo-mist { height: 46%; }
   .dual-photo { height: 50%; }
-  .p10 .dual-photo { height: 58%; flex-shrink: 0; }
+  .p10 .dual-photo { height: 46%; flex-shrink: 0; }
   .p10 .dual-photo img { object-position: center 10%; }
   .p10 .dual-photo .photo-fade {
     height: 22%;
@@ -64,17 +64,37 @@
     flex: 1 1 auto;
     justify-content: flex-start;
     gap: 0;
-    padding: 6px 56px 20px !important;
+    padding: 4px 56px 12px !important;
+    min-height: 0;
   }
-  .p10 .brand-en { margin-top: 4px !important; font-size: 78px !important; font-weight: 600; letter-spacing: 0.02em; line-height: 1.05; }
-  .p10 .brand-jp { font-size: 20px !important; margin-top: 10px !important; letter-spacing: 0.45em; color: #6a756c; }
+  .p10 .brand-en { margin-top: 2px !important; font-size: 68px !important; font-weight: 600; letter-spacing: 0.02em; line-height: 1.05; }
+  .p10 .brand-jp { font-size: 18px !important; margin-top: 8px !important; letter-spacing: 0.45em; color: #6a756c; }
   .p10 .divider { margin: 8px 0 !important; }
   .p10 .system { font-size: 16px; }
   .p10 .unit { margin-top: 6px; font-size: 16px; }
-  .p10 .prices { margin-top: 10px !important; gap: 0 !important; width: 82%; }
+  .p10 .prices { margin-top: 10px !important; gap: 0 !important; width: 82%; margin-bottom: 0 !important; }
   .p10 .price-row { padding: 10px 8px !important; }
   .p10 .price-row .p { font-size: 30px !important; }
-  .p10 .tax { margin-top: auto; margin-bottom: 24px; }
+  .p10 .tax {
+    margin-top: 12px !important;
+    margin-bottom: 0 !important;
+    font-size: 15px;
+    color: #888;
+    letter-spacing: 0.18em;
+  }
+  .p10 .bottom-banner {
+    width: 100%;
+    height: 20%;
+    flex-shrink: 0;
+    overflow: hidden;
+    margin-top: auto;
+  }
+  .p10 .bottom-banner img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 45%;
+  }
   .split-photo { height: 44%; border-bottom: 1px solid #e4e6ea; }
   .mag-photo { height: 34%; }
   .photo-inset {
@@ -171,9 +191,9 @@
 
   /* 10 */
   .p10 { background:#fff; }
-  .p10 .brand-en { font-family:"Cormorant Garamond",serif; font-size:78px; font-weight:600; color:#1f2a22; margin-top:4px; letter-spacing:0.02em; line-height:1.05; }
-  .p10 .brand-jp { font-size:20px; margin-top:10px; letter-spacing:0.45em; color:#6a756c; }
-  .p10 .divider { height:1px; width:70%; background:linear-gradient(90deg,transparent,#c9b896,transparent); margin:12px 0; }
+  .p10 .brand-en { font-family:"Cormorant Garamond",serif; font-size:68px; font-weight:600; color:#1f2a22; margin-top:2px; letter-spacing:0.02em; line-height:1.05; }
+  .p10 .brand-jp { font-size:18px; margin-top:8px; letter-spacing:0.45em; color:#6a756c; }
+  .p10 .divider { height:1px; width:70%; background:linear-gradient(90deg,transparent,#c9b896,transparent); margin:10px 0; }
   .p10 .price-row { display:grid; grid-template-columns:1.2fr 1fr; padding:16px 8px; border-top:1px solid #eee; }
   .p10 .price-row:last-of-type { border-bottom:1px solid #eee; }
   .p10 .price-row .p { text-align:right; font-size:34px; }
@@ -485,6 +505,7 @@
         </div>
         <div class="tax">税・サ 30%</div>
       </div>
+      <div class="bottom-banner"><img src="assets/club_interior_banner.jpg" alt="Club Rain Forest"></div>
     </section>
   </div>
   <div class="panel-wrap">
