@@ -22,6 +22,15 @@
 3. 個別は `panel_XX_*.png`
 4. ソースは **`panels.html`** / 女性写真は **`assets/`**
 
+## 他の人に送る
+| 用途 | ファイル |
+|---|---|
+| いちばん簡単（1枚） | `Documents/RainForest_A1_全候補まとめ.jpg` |
+| LINE等（軽量ZIP・約3.5MB） | `Documents/送信用_CLUB_RainForest_サンプル20_軽量.zip` |
+| 高画質ZIP（PNG付き・約21MB） | `Documents/送信用_CLUB_RainForest_A1料金パネル20.zip` |
+
+軽量ZIPを解凍 → `00_見る.html` を開くと一覧表示されます。
+
 ## 再出力
 ```bash
 cd Documents/料金パネル
