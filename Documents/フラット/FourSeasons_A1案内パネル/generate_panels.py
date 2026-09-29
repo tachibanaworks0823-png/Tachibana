@@ -1,54 +1,57 @@
 #!/usr/bin/env python3
-"""Four Seasons — A1縦 無料案内所パネル サンプル20案生成"""
+"""Four Seasons — ガールズスナック向け A1縦 おしゃれ案内パネル 20案"""
 
 from __future__ import annotations
 
-import math
 from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageEnhance, ImageFilter, ImageFont
 
 ROOT = Path(__file__).resolve().parent
 ASSETS = ROOT / "assets"
+FONTS_DIR = ASSETS / "fonts"
 OUT = ROOT / "panels"
 OUT.mkdir(exist_ok=True)
 
-# A1 portrait preview (~76 dpi of 594×841 mm)
 W, H = 1786, 2529
 RATIO = H / W
 
-TEAL = (126, 200, 212)
-TEAL_D = (70, 150, 165)
-GOLD = (212, 185, 120)
-CREAM = (245, 240, 232)
-IVORY = (252, 249, 244)
-CHAR = (18, 18, 20)
-WARM_BLK = (22, 18, 16)
+# Palette — soft glam, not neon-club / not template-menu
+BLUSH = (232, 176, 168)
+ROSE = (196, 120, 118)
+CHAMP = (214, 188, 150)
+PEARL = (248, 244, 240)
+IVORY = (255, 250, 246)
+INK = (28, 24, 26)
+SOFT_BLK = (16, 14, 16)
+WINE = (92, 36, 48)
+MIST = (232, 228, 224)
+TEAL_SOFT = (150, 186, 190)
 WHITE = (255, 255, 255)
-SOFT_GRAY = (230, 228, 224)
 
-FONT_SERIF = "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf"
-FONT_SERIF_R = "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf"
-FONT_SANS = "/usr/share/fonts/truetype/wqy/wqy-microhei.ttc"
-FONT_SANS_R = "/usr/share/fonts/truetype/wqy/wqy-microhei.ttc"
+FONT_PLAY = str(FONTS_DIR / "PlayfairDisplay[wght].ttf")
+FONT_PLAY_I = str(FONTS_DIR / "PlayfairDisplay-Italic[wght].ttf")
+FONT_JOSE = str(FONTS_DIR / "JosefinSans[wght].ttf")
+FONT_CORM = str(FONTS_DIR / "CormorantGaramond[wght].ttf")
+FONT_SCRIPT = str(FONTS_DIR / "GreatVibes-Regular.ttf")
 FONT_JP = "/usr/share/fonts/truetype/wqy/wqy-microhei.ttc"
-FONT_LATIN = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
-FONT_LATIN_SERIF = "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf"
 
-PRICE_LINES = [
-    "Set 50分",
-    "カウンター席  ¥3,000",
-    "ボックス席    ¥4,000",
-    "TAX 20%",
+PRICE = [
+    ("Set 50分", ""),
+    ("カウンター席", "¥3,000"),
+    ("ボックス席", "¥4,000"),
 ]
-DRINK_LINES = [
-    "甲類、ウイスキー、リキュール各種",
-    "割りもの、お茶類、炭酸",
-]
+DRINKS = "甲類・ウイスキー・リキュール各種 ／ 割りもの・お茶・炭酸"
 
 
-def font(path: str, size: int) -> ImageFont.FreeTypeFont:
-    return ImageFont.truetype(path, size)
+def F(path: str, size: int, weight: int | None = None) -> ImageFont.FreeTypeFont:
+    f = ImageFont.truetype(path, size)
+    if weight is not None:
+        try:
+            f.set_variation_by_axes([weight])
+        except Exception:
+            pass
+    return f
 
 
 def load_bar() -> Image.Image:
@@ -59,14 +62,12 @@ def load_sofa() -> Image.Image:
     return Image.open(ASSETS / "interior_sofa.jpg").convert("RGB")
 
 
-def load_logo(kind: str = "black") -> Image.Image:
-    if kind == "clear":
-        return Image.open(ASSETS / "logo.png").convert("RGBA")
-    return Image.open(ASSETS / "logo_black.png").convert("RGBA")
+def load_logo(kind: str = "clear") -> Image.Image:
+    name = "logo.png" if kind == "clear" else "logo_black.png"
+    return Image.open(ASSETS / name).convert("RGBA")
 
 
-def cover_crop(im: Image.Image, tw: int, th: int, focus=(0.5, 0.45)) -> Image.Image:
-    """Scale-to-cover and crop with focus point (fx, fy in 0..1)."""
+def cover(im: Image.Image, tw: int, th: int, focus=(0.5, 0.42)) -> Image.Image:
     sw, sh = im.size
     scale = max(tw / sw, th / sh)
     nw, nh = int(sw * scale + 0.5), int(sh * scale + 0.5)
@@ -77,622 +78,553 @@ def cover_crop(im: Image.Image, tw: int, th: int, focus=(0.5, 0.45)) -> Image.Im
     return im.crop((left, top, left + tw, top + th))
 
 
-def fit_contain(im: Image.Image, tw: int, th: int) -> Image.Image:
+def contain(im: Image.Image, tw: int, th: int) -> Image.Image:
     sw, sh = im.size
-    scale = min(tw / sw, th / sh)
-    nw, nh = max(1, int(sw * scale)), max(1, int(sh * scale))
-    return im.resize((nw, nh), Image.Resampling.LANCZOS)
+    s = min(tw / sw, th / sh)
+    return im.resize((max(1, int(sw * s)), max(1, int(sh * s))), Image.Resampling.LANCZOS)
 
 
-def paste_center(base: Image.Image, overlay: Image.Image, box, mask=None):
+def paste_c(base: Image.Image, ov: Image.Image, box):
     x, y, w, h = box
-    ov = fit_contain(overlay, w, h)
-    px = x + (w - ov.width) // 2
-    py = y + (h - ov.height) // 2
-    if ov.mode == "RGBA":
-        base.paste(ov, (px, py), ov)
+    o = contain(ov, w, h)
+    px, py = x + (w - o.width) // 2, y + (h - o.height) // 2
+    if o.mode == "RGBA":
+        base.paste(o, (px, py), o)
     else:
-        base.paste(ov, (px, py), mask)
+        base.paste(o, (px, py))
 
 
-def draw_text_center(draw, xy, text, fnt, fill, stroke_fill=None, stroke_width=0):
-    x, y = xy
-    bbox = draw.textbbox((0, 0), text, font=fnt)
-    tw = bbox[2] - bbox[0]
-    th = bbox[3] - bbox[1]
-    draw.text(
-        (x - tw / 2, y - th / 2),
-        text,
-        font=fnt,
-        fill=fill,
-        stroke_fill=stroke_fill,
-        stroke_width=stroke_width,
-    )
-
-
-def gradient(size, c1, c2, vertical=True):
+def grad(size, c1, c2, vertical=True):
     w, h = size
     im = Image.new("RGB", size)
     px = im.load()
+    n = (h if vertical else w) - 1 or 1
     for i in range(h if vertical else w):
-        t = i / max(1, (h if vertical else w) - 1)
-        r = int(c1[0] + (c2[0] - c1[0]) * t)
-        g = int(c1[1] + (c2[1] - c1[1]) * t)
-        b = int(c1[2] + (c2[2] - c1[2]) * t)
+        t = i / n
+        rgb = tuple(int(c1[j] + (c2[j] - c1[j]) * t) for j in range(3))
         if vertical:
             for x in range(w):
-                px[x, i] = (r, g, b)
+                px[x, i] = rgb
         else:
             for y in range(h):
-                px[i, y] = (r, g, b)
+                px[i, y] = rgb
     return im
 
 
-def darken(im: Image.Image, factor=0.55) -> Image.Image:
-    return ImageEnhance.Brightness(im).enhance(factor)
+def soft(im: Image.Image, b=0.88, c=1.05) -> Image.Image:
+    im = ImageEnhance.Brightness(im).enhance(b)
+    return ImageEnhance.Color(im).enhance(c)
 
 
-def vignette(im: Image.Image, strength=0.45) -> Image.Image:
-    w, h = im.size
-    mask = Image.new("L", (w, h), 0)
-    d = ImageDraw.Draw(mask)
-    d.ellipse((-w * 0.15, -h * 0.1, w * 1.15, h * 1.1), fill=255)
-    mask = mask.filter(ImageFilter.GaussianBlur(max(w, h) // 8))
-    dark = Image.new("RGB", (w, h), (0, 0, 0))
-    # blend: where mask is low, more dark
-    inv = ImageEval = ImageEnhance.Brightness(mask).enhance(1)
-    # Use Image.composite with darkened
-    darkened = darken(im, 1 - strength)
-    return Image.composite(im, darkened, mask)
+def veil(base: Image.Image, box, color=(0, 0, 0), alpha=120):
+    """Soft translucent rectangle overlay."""
+    x0, y0, x1, y1 = box
+    layer = Image.new("RGBA", base.size, (0, 0, 0, 0))
+    d = ImageDraw.Draw(layer)
+    d.rectangle((x0, y0, x1, y1), fill=(*color, alpha))
+    out = Image.alpha_composite(base.convert("RGBA"), layer)
+    return out.convert("RGB")
 
 
-def price_block(draw, x, y, w, fill=WHITE, accent=TEAL, scale=1.0, drinks=True, compact=False):
-    """料金＋飲み放題メニュー。戻り値は描画後のY。"""
-    title_size = int((22 if compact else 28) * scale)
-    line_size = int((26 if compact else 34) * scale)
-    drink_size = int((22 if compact else 28) * scale)
-    gap = int((14 if compact else 22) * scale)
-    f_title = font(FONT_JP, title_size)
-    f_line = font(FONT_JP, line_size)
-    f_drink = font(FONT_JP, drink_size)
-
-    draw.text((x, y), "料金", font=f_title, fill=accent)
-    yy = y + int(title_size * 1.55)
-    for line in PRICE_LINES:
-        draw.text((x, yy), line, font=f_line, fill=fill)
-        bb = draw.textbbox((x, yy), line, font=f_line)
-        draw.line((bb[0], bb[3] + 4, min(x + w, bb[0] + max(w * 0.85, bb[2] - bb[0] + 40)), bb[3] + 4), fill=accent, width=2)
-        yy = bb[3] + gap
-
-    if drinks:
-        yy += int(8 * scale)
-        draw.text((x, yy), "飲み放題メニュー", font=f_title, fill=accent)
-        yy += int(title_size * 1.55)
-        for line in DRINK_LINES:
-            draw.text((x, yy), line, font=f_drink, fill=fill)
-            bb = draw.textbbox((x, yy), line, font=f_drink)
-            yy = bb[3] + int(gap * 0.85)
-    return yy
+def text_c(draw, xy, text, fnt, fill, stroke=None, sw=0):
+    x, y = xy
+    bb = draw.textbbox((0, 0), text, font=fnt)
+    tw, th = bb[2] - bb[0], bb[3] - bb[1]
+    draw.text((x - tw / 2, y - th / 2), text, font=fnt, fill=fill, stroke_width=sw, stroke_fill=stroke)
 
 
-def tag_label(draw, text, xy, fnt, fill=WHITE, bg=(0, 0, 0, 160)):
-    # unused helper kept for clarity
-    pass
+def hairline(draw, y, x0, x1, fill, width=1):
+    draw.line((x0, y, x1, y), fill=fill, width=width)
+
+
+def chic_price(draw, x, y, w, fill=WHITE, accent=BLUSH, scale=1.0, center=False):
+    """Refined price block — fashion editorial style, not menu dump."""
+    f_label = F(FONT_JOSE, int(22 * scale), 300)
+    f_jp = F(FONT_JP, int(28 * scale))
+    f_num = F(FONT_PLAY, int(34 * scale), 500)
+    f_tiny = F(FONT_JOSE, int(18 * scale), 300)
+
+    draw.text((x, y), "料金", font=F(FONT_JP, int(24 * scale)), fill=accent)
+    yy = y + int(36 * scale)
+    hairline(draw, yy, x, x + int(w * 0.35), accent, 1)
+    yy += int(20 * scale)
+
+    for label, price in PRICE:
+        if center:
+            line = f"{label}  {price}".strip()
+            text_c(draw, (x + w // 2, yy + int(14 * scale)), line, f_jp, fill)
+            yy += int(44 * scale)
+        else:
+            draw.text((x, yy), label, font=f_jp, fill=fill)
+            if price:
+                bb = draw.textbbox((0, 0), price, font=f_num)
+                draw.text((x + w - (bb[2] - bb[0]), yy - 2), price, font=f_num, fill=fill)
+            yy += int(46 * scale)
+
+    draw.text((x, yy + int(4 * scale)), "TAX 20%", font=f_tiny, fill=accent)
+    yy += int(36 * scale)
+    hairline(draw, yy, x, x + int(w * 0.35), accent, 1)
+    yy += int(16 * scale)
+    draw.text((x, yy), "飲み放題", font=F(FONT_JP, int(22 * scale)), fill=accent)
+    yy += int(30 * scale)
+    f_d = F(FONT_JP, int(21 * scale))
+    draw.text((x, yy), DRINKS, font=f_d, fill=fill)
+    return yy + int(28 * scale)
 
 
 def save(im: Image.Image, name: str, title: str):
     path = OUT / name
-    rgb = im.convert("RGB")
-    rgb.save(path, "JPEG", quality=88, optimize=True)
-    print(f"  wrote {path.name} — {title}")
+    im.convert("RGB").save(path, "JPEG", quality=90, optimize=True)
+    print(f"  {name} — {title}")
     return path, title
 
 
-# ---------- Layouts ----------
+# ===================== 20 chic layouts =====================
 
-def layout_01():
-    """フルブリードバー写真・中央ロゴ帯＋料金・下ソファ"""
-    canvas = Image.new("RGB", (W, H), CHAR)
-    top_h = int(H * 0.52)
-    canvas.paste(darken(cover_crop(load_bar(), W, top_h, (0.55, 0.4)), 0.72), (0, 0))
-    mid_band = int(H * 0.22)
-    sofa_h = H - top_h - mid_band
-    canvas.paste(gradient((W, mid_band), (10, 12, 14), (20, 24, 28)), (0, top_h))
-    paste_center(canvas, load_logo("clear"), (int(W * 0.12), top_h + 8, int(W * 0.76), int(mid_band * 0.48)))
+def L01():
+    """フルブリード夜景・中央セリフブランド"""
+    canvas = soft(cover(load_bar(), W, H, (0.55, 0.4)), 0.55, 1.1)
+    canvas = veil(canvas, (0, int(H * 0.28), W, int(H * 0.72)), (10, 8, 10), 140)
     d = ImageDraw.Draw(canvas)
-    price_block(
-        d,
-        int(W * 0.08),
-        top_h + int(mid_band * 0.48) + 2,
-        int(W * 0.84),
-        fill=WHITE,
-        accent=TEAL,
-        scale=0.7,
-        compact=True,
-    )
-    canvas.paste(cover_crop(load_sofa(), W, sofa_h, (0.45, 0.4)), (0, top_h + mid_band))
+    text_c(d, (W // 2, int(H * 0.34)), "GIRLS SNACK", F(FONT_JOSE, 28, 300), BLUSH)
+    paste_c(canvas, load_logo("clear"), (int(W * 0.14), int(H * 0.38), int(W * 0.72), int(H * 0.14)))
+    text_c(d, (W // 2, int(H * 0.58)), "大人のための、静かな夜。", F(FONT_JP, 32), PEARL)
+    hairline(d, int(H * 0.63), int(W * 0.35), int(W * 0.65), CHAMP, 1)
+    chic_price(d, int(W * 0.18), int(H * 0.68), int(W * 0.64), fill=PEARL, accent=BLUSH, scale=1.05)
     return canvas
 
 
-def layout_02():
-    """上下二等分・中央ロゴ帯＋下料金"""
-    canvas = Image.new("RGB", (W, H), CHAR)
-    mid = int(H * 0.34)
-    band = int(H * 0.12)
-    foot = int(H * 0.24)
-    canvas.paste(cover_crop(load_bar(), W, mid, (0.5, 0.4)), (0, 0))
-    canvas.paste(cover_crop(load_sofa(), W, H - mid - band - foot, (0.5, 0.45)), (0, mid + band))
-    canvas.paste(gradient((W, band), (12, 14, 18), (28, 36, 42)), (0, mid))
-    paste_center(canvas, load_logo("clear"), (int(W * 0.18), mid + int(band * 0.08), int(W * 0.64), int(band * 0.84)))
-    canvas.paste(gradient((W, foot), (14, 16, 20), (8, 10, 12)), (0, H - foot))
+def L02():
+    """blush サイドパネル・写真大"""
+    canvas = Image.new("RGB", (W, H), (244, 228, 224))
+    photo_w = int(W * 0.62)
+    canvas.paste(soft(cover(load_bar(), photo_w, int(H * 0.52), (0.55, 0.4)), 0.95), (0, 0))
+    canvas.paste(soft(cover(load_sofa(), photo_w, H - int(H * 0.52), (0.45, 0.45)), 0.95), (0, int(H * 0.52)))
     d = ImageDraw.Draw(canvas)
-    price_block(d, int(W * 0.08), H - foot + 20, int(W * 0.84), fill=WHITE, accent=TEAL, scale=0.9, compact=True)
+    rx = photo_w + 36
+    paste_c(canvas, load_logo("black"), (rx, 80, W - rx - 40, 160))
+    text_c(d, ((photo_w + W) // 2, 300), "Girls Snack", F(FONT_SCRIPT, 52), ROSE)
+    chic_price(d, rx + 8, 380, W - rx - 60, fill=INK, accent=ROSE, scale=0.95)
+    text_c(d, ((photo_w + W) // 2, H - 70), "ご来店お待ちしております", F(FONT_JP, 22), ROSE)
     return canvas
 
 
-def layout_03():
-    """マガジン：ロゴ上・大バー・下ソファ＋料金"""
+def L03():
+    """エディトリアル白・大写真1枚＋小"""
     canvas = Image.new("RGB", (W, H), IVORY)
     d = ImageDraw.Draw(canvas)
-    paste_center(canvas, load_logo("black"), (int(W * 0.15), 40, int(W * 0.7), 180))
-    d.line((int(W * 0.2), 240, int(W * 0.8), 240), fill=TEAL_D, width=2)
-    draw_text_center(d, (W // 2, 275), "GIRL'S BAR  /  LOUNGE PUB SNACK", font(FONT_SANS, 26), TEAL_D)
-    y0 = 310
-    bar_h = int(H * 0.30)
-    canvas.paste(cover_crop(load_bar(), W - 80, bar_h, (0.55, 0.42)), (40, y0))
-    y1 = y0 + bar_h + 22
-    sofa_h = int(H * 0.24)
-    canvas.paste(cover_crop(load_sofa(), W - 80, sofa_h, (0.5, 0.45)), (40, y1))
-    price_block(d, 60, y1 + sofa_h + 28, W - 120, fill=(40, 35, 30), accent=TEAL_D, scale=0.95, compact=True)
-    return canvas
-
-
-def layout_04():
-    """黒フレーム・積層写真・価格"""
-    canvas = Image.new("RGB", (W, H), CHAR)
-    margin = 48
-    paste_center(canvas, load_logo("clear"), (margin, 40, W - 2 * margin, 170))
-    y = 230
-    gap = 22
-    h1 = int(H * 0.24)
-    canvas.paste(cover_crop(load_bar(), W - 2 * margin, h1, (0.55, 0.4)), (margin, y))
-    y += h1 + gap
-    h2 = int(H * 0.22)
-    canvas.paste(cover_crop(load_sofa(), W - 2 * margin, h2, (0.45, 0.4)), (margin, y))
-    y += h2 + 28
-    d = ImageDraw.Draw(canvas)
-    price_block(d, margin + 20, y, W - 2 * margin - 40, fill=WHITE, accent=TEAL, scale=1.05, compact=True)
-    return canvas
-
-
-def layout_05():
-    """ティールラグジュアリー"""
-    canvas = gradient((W, H), (18, 48, 55), (8, 18, 22))
-    d = ImageDraw.Draw(canvas)
-    d.rectangle((0, 0, W, 18), fill=TEAL)
-    d.rectangle((0, H - 18, W, H), fill=TEAL)
-    paste_center(canvas, load_logo("clear"), (int(W * 0.12), 40, int(W * 0.76), 180))
-    y = 250
-    bar_h = int(H * 0.28)
-    canvas.paste(cover_crop(load_bar(), W - 100, bar_h, (0.55, 0.4)), (50, y))
-    y += bar_h + 28
-    left_w = int(W * 0.52)
-    canvas.paste(cover_crop(load_sofa(), left_w - 50, H - y - 50, (0.4, 0.45)), (50, y))
-    price_block(d, left_w + 20, y + 10, W - left_w - 70, fill=WHITE, accent=TEAL, scale=0.92, compact=True)
-    return canvas
-
-
-def layout_06():
-    """斜め分割（非対称）＋下料金帯"""
-    bar = cover_crop(load_bar(), W, H, (0.55, 0.4))
-    sofa = cover_crop(load_sofa(), W, H, (0.45, 0.45))
-    mask = Image.new("L", (W, H), 0)
-    md = ImageDraw.Draw(mask)
-    md.polygon([(0, 0), (W, 0), (W, int(H * 0.48)), (0, int(H * 0.68))], fill=255)
-    canvas = Image.composite(bar, sofa, mask)
-    overlay = Image.new("RGBA", (W, H), (0, 0, 0, 0))
-    od = ImageDraw.Draw(overlay)
-    od.rectangle((0, int(H * 0.32), W, int(H * 0.48)), fill=(0, 0, 0, 175))
-    od.rectangle((0, int(H * 0.70), W, H), fill=(0, 0, 0, 200))
-    canvas = Image.alpha_composite(canvas.convert("RGBA"), overlay).convert("RGB")
-    paste_center(canvas, load_logo("clear"), (int(W * 0.1), int(H * 0.34), int(W * 0.8), int(H * 0.12)))
-    d = ImageDraw.Draw(canvas)
-    price_block(d, int(W * 0.08), int(H * 0.73), int(W * 0.84), fill=WHITE, accent=TEAL, scale=0.95, compact=True)
-    return canvas
-
-
-def layout_07():
-    """クリーム地・ロゴヒーロー・二枚グリッド"""
-    canvas = Image.new("RGB", (W, H), CREAM)
-    d = ImageDraw.Draw(canvas)
-    paste_center(canvas, load_logo("black"), (int(W * 0.1), 50, int(W * 0.8), 200))
-    draw_text_center(d, (W // 2, 290), "落ち着いた大人のガールズバー", font(FONT_JP, 34), (60, 55, 50))
-    gap = 24
-    margin = 50
-    cell_w = (W - 2 * margin - gap) // 2
-    cell_h = int(H * 0.32)
-    y = 340
-    canvas.paste(cover_crop(load_bar(), cell_w, cell_h, (0.55, 0.4)), (margin, y))
-    canvas.paste(cover_crop(load_sofa(), cell_w, cell_h, (0.45, 0.4)), (margin + cell_w + gap, y))
-    price_block(d, margin, y + cell_h + 36, W - 2 * margin, fill=(40, 35, 30), accent=TEAL_D, scale=1.0, compact=True)
-    return canvas
-
-
-def layout_08():
-    """フレーム写真（額縁）＋中央ロゴ・料金"""
-    canvas = gradient((W, H), (32, 28, 26), (12, 10, 10))
-    margin = 60
-    d = ImageDraw.Draw(canvas)
-    d.rectangle((40, 40, W - 40, H - 40), outline=GOLD, width=4)
-    d.rectangle((52, 52, W - 52, H - 52), outline=(90, 75, 50), width=1)
-    y = 80
-    h1 = int(H * 0.26)
-    canvas.paste(cover_crop(load_bar(), W - 2 * margin, h1, (0.55, 0.4)), (margin, y))
-    y += h1 + 20
-    paste_center(canvas, load_logo("clear"), (int(W * 0.15), y, int(W * 0.7), 150))
-    y += 170
-    h2 = int(H * 0.22)
-    canvas.paste(cover_crop(load_sofa(), W - 2 * margin, h2, (0.45, 0.45)), (margin, y))
-    y += h2 + 24
-    price_block(d, margin + 10, y, W - 2 * margin - 20, fill=CREAM, accent=GOLD, scale=0.95, compact=True)
-    return canvas
-
-
-def layout_09():
-    """全面コラージュ・中央ロゴバッジ＋下料金"""
-    canvas = Image.new("RGB", (W, H))
-    top_h = int(H * 0.48)
-    canvas.paste(cover_crop(load_bar(), W, top_h, (0.5, 0.35)), (0, 0))
-    canvas.paste(cover_crop(load_sofa(), W, H - top_h, (0.5, 0.5)), (0, top_h))
-    badge = Image.new("RGBA", (W, H), (0, 0, 0, 0))
-    bd = ImageDraw.Draw(badge)
-    bw, bh = int(W * 0.78), int(H * 0.16)
-    bx, by = (W - bw) // 2, int(H * 0.34)
-    bd.rounded_rectangle((bx, by, bx + bw, by + bh), radius=36, fill=(0, 0, 0, 205))
-    bd.rectangle((0, int(H * 0.72), W, H), fill=(0, 0, 0, 200))
-    canvas = Image.alpha_composite(canvas.convert("RGBA"), badge).convert("RGB")
-    paste_center(canvas, load_logo("clear"), (bx + 40, by + 16, bw - 80, bh - 32))
-    d = ImageDraw.Draw(canvas)
-    price_block(d, int(W * 0.08), int(H * 0.74), int(W * 0.84), fill=WHITE, accent=TEAL, scale=0.95, compact=True)
-    return canvas
-
-
-def layout_10():
-    """左縦ストリップ写真・右情報"""
-    canvas = Image.new("RGB", (W, H), IVORY)
-    left_w = int(W * 0.46)
-    canvas.paste(cover_crop(load_bar(), left_w, int(H * 0.5), (0.6, 0.4)), (0, 0))
-    canvas.paste(cover_crop(load_sofa(), left_w, H - int(H * 0.5), (0.4, 0.45)), (0, int(H * 0.5)))
-    d = ImageDraw.Draw(canvas)
-    rx = left_w + 36
-    paste_center(canvas, load_logo("black"), (rx, 50, W - rx - 36, 170))
-    d.line((rx + 10, 250, W - 50, 250), fill=TEAL_D, width=2)
-    draw_text_center(d, ((left_w + W) // 2, 295), "GIRL'S BAR", font(FONT_SANS, 30), TEAL_D)
-    price_block(d, rx + 4, 340, W - rx - 50, fill=(30, 28, 26), accent=TEAL_D, scale=0.95, compact=True)
-    draw_text_center(d, ((left_w + W) // 2, H - 60), "ご来店お待ちしております", font(FONT_JP, 26), (80, 70, 60))
-    return canvas
-
-
-def layout_11():
-    """上ロゴ帯・写真スタック・下料金帯"""
-    canvas = Image.new("RGB", (W, H), CHAR)
-    header = int(H * 0.12)
-    foot = int(H * 0.22)
-    head = gradient((W, header), (20, 24, 28), (10, 12, 14))
-    canvas.paste(head, (0, 0))
-    paste_center(canvas, load_logo("clear"), (int(W * 0.15), 12, int(W * 0.7), header - 24))
-    rest = H - header - foot
-    h1 = int(rest * 0.55)
-    canvas.paste(cover_crop(load_bar(), W, h1, (0.55, 0.4)), (0, header))
-    canvas.paste(cover_crop(load_sofa(), W, rest - h1, (0.45, 0.45)), (0, header + h1))
-    foot_im = gradient((W, foot), (14, 16, 20), (6, 8, 10))
-    canvas.paste(foot_im, (0, H - foot))
-    d = ImageDraw.Draw(canvas)
-    price_block(d, int(W * 0.08), H - foot + 20, int(W * 0.84), fill=WHITE, accent=TEAL, scale=0.9, compact=True)
-    return canvas
-
-
-def layout_12():
-    """円形クロップ写真＋ロゴ"""
-    canvas = gradient((W, H), (245, 242, 238), (220, 228, 230))
-    d = ImageDraw.Draw(canvas)
-    paste_center(canvas, load_logo("black"), (int(W * 0.15), 40, int(W * 0.7), 180))
-
-    def circle_photo(src, cx, cy, r, focus):
-        photo = cover_crop(src, 2 * r, 2 * r, focus)
-        mask = Image.new("L", (2 * r, 2 * r), 0)
-        ImageDraw.Draw(mask).ellipse((0, 0, 2 * r - 1, 2 * r - 1), fill=255)
-        canvas.paste(photo, (cx - r, cy - r), mask)
-        d.ellipse((cx - r - 4, cy - r - 4, cx + r + 4, cy + r + 4), outline=TEAL_D, width=3)
-
-    r = int(W * 0.22)
-    circle_photo(load_bar(), int(W * 0.32), int(H * 0.38), r, (0.55, 0.4))
-    circle_photo(load_sofa(), int(W * 0.68), int(H * 0.52), int(r * 0.9), (0.45, 0.45))
-    price_block(d, int(W * 0.1), int(H * 0.68), int(W * 0.8), fill=(40, 40, 40), accent=TEAL_D, scale=0.95, compact=True)
-    return canvas
-
-
-def layout_13():
-    """暖色ウッドトーン（バーに合わせる）"""
-    canvas = gradient((W, H), (48, 32, 22), (18, 12, 10))
-    d = ImageDraw.Draw(canvas)
-    d.rectangle((0, 0, W, 12), fill=GOLD)
-    paste_center(canvas, load_logo("clear"), (int(W * 0.1), 40, int(W * 0.8), 170))
-    y = 230
-    m = 40
-    h1 = int(H * 0.26)
-    canvas.paste(cover_crop(load_bar(), W - 2 * m, h1, (0.55, 0.42)), (m, y))
-    d.rectangle((m - 2, y - 2, W - m + 2, y + h1 + 2), outline=GOLD, width=2)
-    y += h1 + 28
-    h2 = int(H * 0.20)
-    canvas.paste(cover_crop(load_sofa(), W - 2 * m, h2, (0.45, 0.4)), (m, y))
-    y += h2 + 28
-    price_block(d, m + 10, y, W - 2 * m, fill=CREAM, accent=GOLD, scale=1.0, compact=True)
-    return canvas
-
-
-def layout_14():
-    """ナイトライフ・ネオンエッジ"""
-    canvas = Image.new("RGB", (W, H), (8, 8, 14))
-    d = ImageDraw.Draw(canvas)
-    for i, col in enumerate([(80, 200, 255), (255, 80, 160), (120, 255, 180)]):
-        d.rectangle((8 + i * 4, 8 + i * 4, W - 9 - i * 4, H - 9 - i * 4), outline=col, width=2)
-    bar = darken(cover_crop(load_bar(), W - 80, int(H * 0.28), (0.55, 0.4)), 0.85)
-    canvas.paste(bar, (40, 50))
-    paste_center(canvas, load_logo("clear"), (int(W * 0.12), int(H * 0.32), int(W * 0.76), 160))
-    sofa = darken(cover_crop(load_sofa(), W - 80, int(H * 0.22), (0.45, 0.45)), 0.9)
-    canvas.paste(sofa, (40, int(H * 0.42)))
-    price_block(d, 60, int(H * 0.68), W - 120, fill=WHITE, accent=TEAL, scale=0.95, compact=True)
-    return canvas
-
-
-def layout_15():
-    """ミニマル白・インセット写真"""
-    canvas = Image.new("RGB", (W, H), WHITE)
-    d = ImageDraw.Draw(canvas)
-    d.rectangle((30, 30, W - 30, H - 30), outline=(200, 200, 200), width=1)
-    paste_center(canvas, load_logo("black"), (int(W * 0.18), 50, int(W * 0.64), 170))
-    draw_text_center(d, (W // 2, 250), "GIRL'S BAR / LOUNGE PUB SNACK", font(FONT_JP, 24), (140, 140, 140))
+    text_c(d, (W // 2, 70), "FOUR SEASONS", F(FONT_JOSE, 26, 300), ROSE)
+    paste_c(canvas, load_logo("black"), (int(W * 0.2), 100, int(W * 0.6), 140))
+    m = 60
+    canvas.paste(soft(cover(load_bar(), W - 2 * m, int(H * 0.38), (0.55, 0.4)), 0.98), (m, 270))
+    # two small under
     gap = 20
-    m = 70
-    h1 = int(H * 0.26)
-    canvas.paste(cover_crop(load_bar(), W - 2 * m, h1, (0.55, 0.4)), (m, 290))
-    y = 290 + h1 + gap
-    h2 = int(H * 0.20)
-    canvas.paste(cover_crop(load_sofa(), W - 2 * m, h2, (0.45, 0.45)), (m, y))
-    price_block(d, m, y + h2 + 28, W - 2 * m, fill=(50, 50, 50), accent=TEAL_D, scale=0.95, compact=True)
+    sw = (W - 2 * m - gap) // 2
+    y = 270 + int(H * 0.38) + 24
+    canvas.paste(soft(cover(load_sofa(), sw, int(H * 0.22), (0.4, 0.4)), 0.98), (m, y))
+    # elegant quote panel instead of second small photo duplicate - use sofa crop different
+    canvas.paste(soft(cover(load_sofa(), sw, int(H * 0.22), (0.7, 0.5)), 0.98), (m + sw + gap, y))
+    chic_price(d, m + 20, y + int(H * 0.22) + 40, W - 2 * m - 40, fill=INK, accent=ROSE, scale=1.0)
     return canvas
 
 
-def layout_16():
-    """下ロゴ＋料金フッター・上写真二段"""
-    canvas = Image.new("RGB", (W, H), CHAR)
-    foot = int(H * 0.28)
-    h_each = (H - foot) // 2
-    canvas.paste(cover_crop(load_bar(), W, h_each, (0.55, 0.38)), (0, 0))
-    canvas.paste(cover_crop(load_sofa(), W, h_each, (0.45, 0.45)), (0, h_each))
-    foot_im = gradient((W, foot), (14, 16, 20), (6, 8, 10))
-    canvas.paste(foot_im, (0, H - foot))
-    paste_center(canvas, load_logo("clear"), (int(W * 0.18), H - foot + 12, int(W * 0.64), 110))
+def L04():
+    """ワインカラーラグジュアリー"""
+    canvas = grad((W, H), (60, 22, 34), (22, 10, 16))
     d = ImageDraw.Draw(canvas)
-    price_block(d, int(W * 0.08), H - foot + 130, int(W * 0.84), fill=WHITE, accent=TEAL, scale=0.88, compact=True)
+    d.rectangle((40, 40, W - 40, H - 40), outline=CHAMP, width=1)
+    paste_c(canvas, load_logo("clear"), (int(W * 0.15), 70, int(W * 0.7), 150))
+    text_c(d, (W // 2, 250), "Quiet nights, soft lights.", F(FONT_PLAY_I, 34, 400), CHAMP)
+    y = 300
+    canvas.paste(soft(cover(load_bar(), W - 160, int(H * 0.28), (0.55, 0.4)), 0.9), (80, y))
+    y += int(H * 0.28) + 24
+    canvas.paste(soft(cover(load_sofa(), W - 160, int(H * 0.24), (0.45, 0.45)), 0.9), (80, y))
+    chic_price(d, 100, y + int(H * 0.24) + 36, W - 200, fill=PEARL, accent=CHAMP, scale=1.0)
     return canvas
 
 
-def layout_17():
-    """オーバーラップ写真＋ロゴ・料金"""
-    canvas = gradient((W, H), (28, 26, 30), (12, 10, 14))
-    bar = cover_crop(load_bar(), int(W * 0.92), int(H * 0.36), (0.55, 0.4))
-    canvas.paste(bar, (int(W * 0.04), 50))
-    sofa = cover_crop(load_sofa(), int(W * 0.85), int(H * 0.30), (0.45, 0.45))
-    shadow = Image.new("RGBA", (sofa.width + 20, sofa.height + 20), (0, 0, 0, 0))
-    sd = ImageDraw.Draw(shadow)
-    sd.rectangle((10, 10, sofa.width + 10, sofa.height + 10), fill=(0, 0, 0, 120))
-    shadow = shadow.filter(ImageFilter.GaussianBlur(12))
-    sx, sy = int(W * 0.1), int(H * 0.34)
-    canvas.paste(shadow, (sx - 10, sy - 10), shadow)
-    canvas.paste(sofa, (sx, sy))
-    paste_center(canvas, load_logo("clear"), (int(W * 0.15), int(H * 0.66), int(W * 0.7), 120))
+def L05():
+    """フルブリードソファ・下部グラス帯"""
+    canvas = soft(cover(load_sofa(), W, H, (0.45, 0.4)), 0.62, 1.05)
+    canvas = veil(canvas, (0, 0, W, int(H * 0.22)), (255, 250, 246), 40)
+    canvas = veil(canvas, (0, int(H * 0.62), W, H), (20, 14, 16), 170)
     d = ImageDraw.Draw(canvas)
-    price_block(d, int(W * 0.08), int(H * 0.76), int(W * 0.84), fill=WHITE, accent=TEAL, scale=0.9, compact=True)
+    paste_c(canvas, load_logo("clear"), (int(W * 0.16), 60, int(W * 0.68), 150))
+    text_c(d, (W // 2, 240), "GIRLS SNACK  ·  LOUNGE", F(FONT_JOSE, 24, 300), WHITE)
+    # tiny bar strip
+    bar_strip = soft(cover(load_bar(), W, int(H * 0.16), (0.55, 0.45)), 0.85)
+    canvas.paste(bar_strip, (0, int(H * 0.48)))
+    chic_price(d, int(W * 0.14), int(H * 0.68), int(W * 0.72), fill=PEARL, accent=BLUSH, scale=1.05)
     return canvas
 
 
-def layout_18():
-    """和モダン縦書きアクセント"""
-    canvas = Image.new("RGB", (W, H), (248, 246, 242))
+def L06():
+    """非対称マガジン（大＋縦帯）"""
+    canvas = Image.new("RGB", (W, H), PEARL)
+    # large left photo
+    lw = int(W * 0.68)
+    canvas.paste(soft(cover(load_bar(), lw, int(H * 0.58), (0.55, 0.4)), 0.96), (0, 0))
+    # right blush column
     d = ImageDraw.Draw(canvas)
-    d.rectangle((0, 0, 28, H), fill=TEAL_D)
-    paste_center(canvas, load_logo("black"), (80, 40, W - 120, 160))
-    vfont = font(FONT_JP, 38)
-    text = "四季を感じる大人の空間"
-    x = W - 90
-    y = 260
-    for ch in text:
-        d.text((x, y), ch, font=vfont, fill=(50, 48, 45))
-        y += 48
-    m = 70
-    h1 = int(H * 0.24)
-    canvas.paste(cover_crop(load_bar(), W - m - 140, h1, (0.55, 0.4)), (m, 230))
-    canvas.paste(cover_crop(load_sofa(), W - m - 140, h1, (0.45, 0.45)), (m, 230 + h1 + 20))
-    price_block(d, m, 230 + 2 * h1 + 40, W - m - 140, fill=(40, 40, 40), accent=TEAL_D, scale=0.92, compact=True)
+    d.rectangle((lw, 0, W, int(H * 0.58)), fill=(236, 210, 204))
+    # vertical text
+    v = "GIRLS SNACK"
+    f = F(FONT_JOSE, 28, 300)
+    y = 80
+    for ch in v:
+        text_c(d, ((lw + W) // 2, y), ch, f, ROSE)
+        y += 42
+    # bottom sofa full width
+    canvas.paste(soft(cover(load_sofa(), W, int(H * 0.22), (0.45, 0.45)), 0.96), (0, int(H * 0.58)))
+    paste_c(canvas, load_logo("black"), (int(W * 0.25), int(H * 0.58) + int(H * 0.22) + 20, int(W * 0.5), 110))
+    chic_price(d, int(W * 0.12), int(H * 0.58) + int(H * 0.22) + 140, int(W * 0.76), fill=INK, accent=ROSE, scale=0.9)
     return canvas
 
 
-def layout_19():
-    """シネマ・レターボックス＋料金フッター"""
-    canvas = Image.new("RGB", (W, H), (0, 0, 0))
-    top_h = int(H * 0.10)
-    foot = int(H * 0.26)
-    content_h = H - top_h - foot
-    gap = 12
-    each = (content_h - gap) // 2
-    canvas.paste(cover_crop(load_bar(), W, each, (0.55, 0.4)), (0, top_h))
-    canvas.paste(cover_crop(load_sofa(), W, each, (0.45, 0.45)), (0, top_h + each + gap))
-    paste_center(canvas, load_logo("clear"), (int(W * 0.18), 8, int(W * 0.64), top_h - 16))
+def L07():
+    """シャンパンゴールド・フレームレス"""
+    canvas = grad((W, H), (36, 30, 28), (18, 16, 16))
     d = ImageDraw.Draw(canvas)
-    price_block(d, int(W * 0.08), H - foot + 24, int(W * 0.84), fill=WHITE, accent=TEAL, scale=0.92, compact=True)
+    text_c(d, (W // 2, 80), "Four Seasons", F(FONT_SCRIPT, 72), CHAMP)
+    text_c(d, (W // 2, 160), "GIRLS SNACK", F(FONT_JOSE, 22, 300), BLUSH)
+    paste_c(canvas, load_logo("clear"), (int(W * 0.22), 190, int(W * 0.56), 120))
+    y = 340
+    for src, foc, hh in [(load_bar, (0.55, 0.4), 0.30), (load_sofa, (0.45, 0.45), 0.26)]:
+        ph = int(H * hh)
+        canvas.paste(soft(cover(src(), W - 120, ph, foc), 0.92), (60, y))
+        y += ph + 28
+    chic_price(d, 80, y + 10, W - 160, fill=PEARL, accent=CHAMP, scale=1.0)
     return canvas
 
 
-def layout_20():
-    """ソフトグラデ＋料金"""
-    canvas = gradient((W, H), (30, 40, 48), (12, 16, 22))
+def L08():
+    """パール地・中央アーチ感（角丸なしで余白構成）"""
+    canvas = Image.new("RGB", (W, H), (250, 246, 242))
     d = ImageDraw.Draw(canvas)
-    paste_center(canvas, load_logo("clear"), (int(W * 0.12), 40, int(W * 0.76), 170))
-    draw_text_center(d, (W // 2, 240), "無料案内所パネル サンプル", font(FONT_JP, 28), (180, 200, 210))
+    # soft top wash
+    top = grad((W, 280), (240, 220, 216), (250, 246, 242))
+    canvas.paste(top, (0, 0))
+    paste_c(canvas, load_logo("black"), (int(W * 0.18), 50, int(W * 0.64), 150))
+    text_c(d, (W // 2, 230), "今夜は、少し贅沢な時間を。", F(FONT_JP, 30), ROSE)
+    # stacked photos with wide margins
+    m = 100
+    canvas.paste(soft(cover(load_bar(), W - 2 * m, int(H * 0.32), (0.55, 0.4)), 1.0), (m, 290))
+    canvas.paste(soft(cover(load_sofa(), W - 2 * m, int(H * 0.26), (0.45, 0.45)), 1.0), (m, 290 + int(H * 0.32) + 28))
+    chic_price(d, m + 10, 290 + int(H * 0.32) + 28 + int(H * 0.26) + 36, W - 2 * m - 20, fill=INK, accent=ROSE, scale=0.95)
+    return canvas
+
+
+def L09():
+    """写真全面・タイポ最小・料金フッター細帯"""
+    canvas = soft(cover(load_bar(), W, int(H * 0.7), (0.55, 0.38)), 0.7, 1.08)
+    bottom = soft(cover(load_sofa(), W, H - int(H * 0.7), (0.5, 0.45)), 0.75)
+    full = Image.new("RGB", (W, H))
+    full.paste(canvas, (0, 0))
+    full.paste(bottom, (0, int(H * 0.7)))
+    full = veil(full, (0, int(H * 0.55), W, H), (12, 10, 12), 160)
+    d = ImageDraw.Draw(full)
+    paste_c(full, load_logo("clear"), (int(W * 0.2), int(H * 0.58), int(W * 0.6), 130))
+    text_c(d, (W // 2, int(H * 0.68)), "Girls Snack  Four Seasons", F(FONT_PLAY_I, 28, 400), BLUSH)
+    chic_price(d, int(W * 0.14), int(H * 0.72), int(W * 0.72), fill=PEARL, accent=CHAMP, scale=0.92)
+    return full
+
+
+def L10():
+    """ローズミスト・二段カードレス"""
+    canvas = grad((W, H), (248, 236, 232), (236, 220, 216))
+    d = ImageDraw.Draw(canvas)
+    text_c(d, (W // 2, 60), "seasonal lounge", F(FONT_JOSE, 20, 300), ROSE)
+    paste_c(canvas, load_logo("black"), (int(W * 0.16), 90, int(W * 0.68), 150))
+    # photos edge to edge almost
+    y = 270
+    canvas.paste(soft(cover(load_bar(), W, int(H * 0.3), (0.55, 0.4)), 0.97), (0, y))
+    y += int(H * 0.3) + 8
+    canvas.paste(soft(cover(load_sofa(), W, int(H * 0.26), (0.45, 0.45)), 0.97), (0, y))
+    # info on soft panel
+    info_y = y + int(H * 0.26) + 20
+    chic_price(d, int(W * 0.12), info_y, int(W * 0.76), fill=INK, accent=ROSE, scale=1.0)
+    return canvas
+
+
+def L11():
+    """モノトーン＋ブラッシュアクセント"""
+    canvas = Image.new("RGB", (W, H), SOFT_BLK)
+    d = ImageDraw.Draw(canvas)
+    # accent line
+    d.rectangle((0, 0, 10, H), fill=BLUSH)
+    paste_c(canvas, load_logo("clear"), (80, 60, W - 120, 150))
+    text_c(d, (W // 2 + 20, 240), "大人ガールズスナック", F(FONT_JP, 28), BLUSH)
+    y = 290
+    canvas.paste(soft(cover(load_bar(), W - 100, int(H * 0.3), (0.55, 0.4)), 0.85), (70, y))
+    y += int(H * 0.3) + 20
+    canvas.paste(soft(cover(load_sofa(), W - 100, int(H * 0.26), (0.45, 0.45)), 0.85), (70, y))
+    chic_price(d, 80, y + int(H * 0.26) + 30, W - 160, fill=PEARL, accent=BLUSH, scale=1.0)
+    return canvas
+
+
+def L12():
+    """縦半分スプリット（写真／タイポ）"""
+    canvas = Image.new("RGB", (W, H), IVORY)
+    left = int(W * 0.52)
+    canvas.paste(soft(cover(load_bar(), left, int(H * 0.5), (0.6, 0.4)), 0.95), (0, 0))
+    canvas.paste(soft(cover(load_sofa(), left, H - int(H * 0.5), (0.4, 0.45)), 0.95), (0, int(H * 0.5)))
+    d = ImageDraw.Draw(canvas)
+    rx = left + 30
+    text_c(d, ((left + W) // 2, 100), "Four", F(FONT_PLAY, 64, 500), ROSE)
+    text_c(d, ((left + W) // 2, 170), "Seasons", F(FONT_PLAY, 64, 500), ROSE)
+    paste_c(canvas, load_logo("black"), (rx, 220, W - rx - 30, 120))
+    text_c(d, ((left + W) // 2, 380), "Girls Snack", F(FONT_SCRIPT, 48), ROSE)
+    hairline(d, 440, rx + 20, W - 50, BLUSH, 1)
+    chic_price(d, rx + 10, 480, W - rx - 50, fill=INK, accent=ROSE, scale=0.95)
+    return canvas
+
+
+def L13():
+    """夜のシフォン — 暗め写真＋手書き感キャッチ"""
+    canvas = soft(cover(load_bar(), W, H, (0.5, 0.4)), 0.45, 1.15)
+    canvas = veil(canvas, (int(W * 0.08), int(H * 0.2), int(W * 0.92), int(H * 0.85)), (8, 6, 8), 150)
+    d = ImageDraw.Draw(canvas)
+    text_c(d, (W // 2, int(H * 0.28)), "Tonight", F(FONT_SCRIPT, 90), BLUSH)
+    paste_c(canvas, load_logo("clear"), (int(W * 0.18), int(H * 0.36), int(W * 0.64), 140))
+    # inset sofa
+    inset = soft(cover(load_sofa(), int(W * 0.7), int(H * 0.18), (0.45, 0.45)), 0.9)
+    canvas.paste(inset, ((W - inset.width) // 2, int(H * 0.52)))
+    chic_price(d, int(W * 0.16), int(H * 0.74), int(W * 0.68), fill=PEARL, accent=BLUSH, scale=0.95)
+    return canvas
+
+
+def L14():
+    """ミント×ブラッシュ（ロゴ葉色を活かす）"""
+    canvas = grad((W, H), (236, 242, 240), (248, 236, 232))
+    d = ImageDraw.Draw(canvas)
+    paste_c(canvas, load_logo("black"), (int(W * 0.18), 50, int(W * 0.64), 150))
+    text_c(d, (W // 2, 230), "soft night  ·  girls snack", F(FONT_JOSE, 24, 300), TEAL_SOFT)
     m = 50
-    h1 = int(H * 0.24)
-    y = 280
-    canvas.paste(cover_crop(load_bar(), W - 2 * m, h1, (0.55, 0.4)), (m, y))
-    y += h1 + 22
-    h2 = int(H * 0.20)
-    canvas.paste(cover_crop(load_sofa(), W - 2 * m, h2, (0.45, 0.45)), (m, y))
-    y += h2 + 28
-    price_block(d, m + 10, y, W - 2 * m - 20, fill=WHITE, accent=TEAL, scale=1.0, compact=True)
+    # overlapping feel via offset
+    canvas.paste(soft(cover(load_bar(), W - 2 * m - 40, int(H * 0.32), (0.55, 0.4)), 0.98), (m, 280))
+    canvas.paste(soft(cover(load_sofa(), W - 2 * m - 40, int(H * 0.28), (0.45, 0.45)), 0.98), (m + 40, 280 + int(H * 0.32) + 16))
+    chic_price(d, m + 20, 280 + int(H * 0.32) + 16 + int(H * 0.28) + 30, W - 2 * m - 40, fill=INK, accent=TEAL_SOFT, scale=0.95)
+    return canvas
+
+
+def L15():
+    """ハイファッション余白・写真は下半分"""
+    canvas = Image.new("RGB", (W, H), IVORY)
+    d = ImageDraw.Draw(canvas)
+    text_c(d, (W // 2, 120), "Four Seasons", F(FONT_PLAY, 70, 600), INK)
+    text_c(d, (W // 2, 200), "Girls Snack", F(FONT_SCRIPT, 56), ROSE)
+    hairline(d, 250, int(W * 0.3), int(W * 0.7), BLUSH, 1)
+    text_c(d, (W // 2, 300), "カウンターとボックス、ふたつの時間。", F(FONT_JP, 26), (90, 70, 70))
+    paste_c(canvas, load_logo("black"), (int(W * 0.25), 340, int(W * 0.5), 100))
+    # dual photos bottom
+    y = 480
+    gap = 16
+    each = (H - y - 280) // 2
+    canvas.paste(soft(cover(load_bar(), W, each, (0.55, 0.4)), 0.98), (0, y))
+    canvas.paste(soft(cover(load_sofa(), W, each, (0.45, 0.45)), 0.98), (0, y + each + gap))
+    chic_price(d, int(W * 0.12), y + 2 * each + gap + 20, int(W * 0.76), fill=INK, accent=ROSE, scale=0.9)
+    return canvas
+
+
+def L16():
+    """ダークシネマなし・ぼかし背景＋クリア前景"""
+    bg = soft(cover(load_bar(), W, H, (0.5, 0.4)), 0.4, 1.2).filter(ImageFilter.GaussianBlur(18))
+    canvas = bg
+    # sharp foreground photos
+    fw, fh = int(W * 0.84), int(H * 0.28)
+    p1 = soft(cover(load_bar(), fw, fh, (0.55, 0.4)), 0.95)
+    p2 = soft(cover(load_sofa(), fw, fh, (0.45, 0.45)), 0.95)
+    canvas.paste(p1, ((W - fw) // 2, int(H * 0.22)))
+    canvas.paste(p2, ((W - fw) // 2, int(H * 0.22) + fh + 20))
+    canvas = veil(canvas, (0, 0, W, int(H * 0.2)), (0, 0, 0), 80)
+    d = ImageDraw.Draw(canvas)
+    paste_c(canvas, load_logo("clear"), (int(W * 0.18), 40, int(W * 0.64), 140))
+    canvas = veil(canvas, (0, int(H * 0.72), W, H), (12, 10, 12), 180)
+    d = ImageDraw.Draw(canvas)
+    chic_price(d, int(W * 0.14), int(H * 0.74), int(W * 0.72), fill=PEARL, accent=BLUSH, scale=0.95)
+    return canvas
+
+
+def L17():
+    """ストリップコラージュおしゃれ"""
+    canvas = Image.new("RGB", (W, H), (20, 16, 18))
+    # three horizontal strips alternating
+    h1, h2, h3 = int(H * 0.28), int(H * 0.22), int(H * 0.22)
+    canvas.paste(soft(cover(load_bar(), W, h1, (0.55, 0.35)), 0.9), (0, 0))
+    # middle brand band
+    band = grad((W, int(H * 0.16)), (40, 28, 30), (24, 18, 20))
+    canvas.paste(band, (0, h1))
+    paste_c(canvas, load_logo("clear"), (int(W * 0.18), h1 + 20, int(W * 0.64), int(H * 0.12)))
+    canvas.paste(soft(cover(load_sofa(), W, h2, (0.45, 0.45)), 0.9), (0, h1 + int(H * 0.16)))
+    y = h1 + int(H * 0.16) + h2
+    # bottom info on dark
+    d = ImageDraw.Draw(canvas)
+    text_c(d, (W // 2, y + 40), "Girls Snack", F(FONT_SCRIPT, 48), BLUSH)
+    chic_price(d, int(W * 0.14), y + 90, int(W * 0.72), fill=PEARL, accent=CHAMP, scale=0.95)
+    return canvas
+
+
+def L18():
+    """和モダンではなくフレンチシック縦書き風"""
+    canvas = Image.new("RGB", (W, H), (252, 248, 244))
+    d = ImageDraw.Draw(canvas)
+    d.rectangle((0, 0, 16, H), fill=ROSE)
+    paste_c(canvas, load_logo("black"), (60, 50, W - 160, 140))
+    # vertical phrase
+    phrase = "華やかな夜に"
+    f = F(FONT_JP, 36)
+    x = W - 80
+    y = 220
+    for ch in phrase:
+        d.text((x, y), ch, font=f, fill=ROSE)
+        y += 48
+    m = 60
+    canvas.paste(soft(cover(load_bar(), W - m - 120, int(H * 0.28), (0.55, 0.4)), 0.98), (m, 220))
+    canvas.paste(soft(cover(load_sofa(), W - m - 120, int(H * 0.26), (0.45, 0.45)), 0.98), (m, 220 + int(H * 0.28) + 20))
+    chic_price(d, m, 220 + int(H * 0.28) + 20 + int(H * 0.26) + 30, W - m - 120, fill=INK, accent=ROSE, scale=0.95)
+    return canvas
+
+
+def L19():
+    """コントラスト強め・白抜きタイポ on 写真"""
+    top = soft(cover(load_bar(), W, int(H * 0.55), (0.55, 0.4)), 0.6, 1.1)
+    bot = soft(cover(load_sofa(), W, H - int(H * 0.55), (0.45, 0.45)), 0.65, 1.05)
+    canvas = Image.new("RGB", (W, H))
+    canvas.paste(top, (0, 0))
+    canvas.paste(bot, (0, int(H * 0.55)))
+    canvas = veil(canvas, (0, int(H * 0.35), W, int(H * 0.62)), (0, 0, 0), 130)
+    d = ImageDraw.Draw(canvas)
+    text_c(d, (W // 2, int(H * 0.4)), "GIRLS SNACK", F(FONT_JOSE, 30, 300), BLUSH)
+    paste_c(canvas, load_logo("clear"), (int(W * 0.14), int(H * 0.44), int(W * 0.72), 140))
+    chic_price(d, int(W * 0.14), int(H * 0.72), int(W * 0.72), fill=WHITE, accent=BLUSH, scale=1.0)
+    return canvas
+
+
+def L20():
+    """ブティックポスター — 上余白タイポ、下写真コラージュ"""
+    canvas = grad((W, H), (30, 24, 28), (14, 12, 14))
+    d = ImageDraw.Draw(canvas)
+    text_c(d, (W // 2, 70), "est. night lounge", F(FONT_JOSE, 18, 300), CHAMP)
+    text_c(d, (W // 2, 140), "Four Seasons", F(FONT_PLAY, 68, 600), PEARL)
+    text_c(d, (W // 2, 210), "Girls Snack", F(FONT_SCRIPT, 54), BLUSH)
+    paste_c(canvas, load_logo("clear"), (int(W * 0.22), 250, int(W * 0.56), 110))
+    # collage two photos with gap
+    y = 400
+    gap = 14
+    pw = (W - 100 - gap) // 2
+    ph = int(H * 0.34)
+    canvas.paste(soft(cover(load_bar(), pw, ph, (0.55, 0.4)), 0.92), (50, y))
+    canvas.paste(soft(cover(load_sofa(), pw, ph, (0.45, 0.45)), 0.92), (50 + pw + gap, y))
+    chic_price(d, 70, y + ph + 40, W - 140, fill=PEARL, accent=CHAMP, scale=1.0)
     return canvas
 
 
 LAYOUTS = [
-    ("01_fullbleed_logo", "フルブリード・中央ロゴ", layout_01),
-    ("02_split_band", "上下分割・中央ロゴ帯", layout_02),
-    ("03_magazine", "マガジン構成", layout_03),
-    ("04_black_stack", "黒フレーム積層＋料金", layout_04),
-    ("05_teal_luxe", "ティールラグジュアリー", layout_05),
-    ("06_diagonal", "斜め分割", layout_06),
-    ("07_cream_grid", "クリーム・二枚グリッド", layout_07),
-    ("08_gold_frame", "ゴールド額縁", layout_08),
-    ("09_collage_badge", "コラージュ中央バッジ", layout_09),
-    ("10_sidebar", "左写真・右情報", layout_10),
-    ("11_header_stack", "上ロゴ帯・写真スタック", layout_11),
-    ("12_circles", "円形クロップ", layout_12),
-    ("13_warm_wood", "暖色ウッドトーン", layout_13),
-    ("14_neon_night", "ネオンナイト", layout_14),
-    ("15_minimal_white", "ミニマルホワイト", layout_15),
-    ("16_footer_logo", "下ロゴフッター", layout_16),
-    ("17_overlap", "オーバーラップ写真", layout_17),
-    ("18_jp_modern", "和モダン縦書き", layout_18),
-    ("19_cinema", "シネマ・レターボックス", layout_19),
-    ("20_soft_gradient", "ソフトグラデ＋料金", layout_20),
+    ("01_night_brand", "ナイトブランド中央", L01),
+    ("02_blush_sidebar", "ブラッシュ・サイド情報", L02),
+    ("03_editorial_white", "エディトリアル白", L03),
+    ("04_wine_luxe", "ワインラグジュアリー", L04),
+    ("05_sofa_hero", "ソファヒーロー", L05),
+    ("06_asymmetric", "非対称マガジン", L06),
+    ("07_champagne", "シャンパンゴールド", L07),
+    ("08_pearl_calm", "パール・余白", L08),
+    ("09_photo_footer", "写真全面・細フッター", L09),
+    ("10_rose_mist", "ローズミスト", L10),
+    ("11_mono_blush", "モノトーン＋ブラッシュ", L11),
+    ("12_split_type", "縦半分タイポ", L12),
+    ("13_tonight_script", "Tonightスクリプト", L13),
+    ("14_mint_blush", "ミント×ブラッシュ", L14),
+    ("15_fashion_space", "ファッション余白", L15),
+    ("16_blur_focus", "ぼかし背景＋クリア", L16),
+    ("17_strip_collage", "ストリップコラージュ", L17),
+    ("18_french_chic", "フレンチシック", L18),
+    ("19_type_on_photo", "写真上タイポ", L19),
+    ("20_boutique", "ブティックポスター", L20),
 ]
 
 
-def make_contact_sheet(items: list[tuple[Path, str]]):
-    """5×4 contact sheet of all panels."""
+def contact_sheet(items):
     cols, rows = 5, 4
-    thumb_w = 360
-    thumb_h = int(thumb_w * RATIO)
-    pad = 16
-    label_h = 36
-    sheet_w = cols * thumb_w + (cols + 1) * pad
-    sheet_h = rows * (thumb_h + label_h) + (rows + 1) * pad + 70
-    sheet = Image.new("RGB", (sheet_w, sheet_h), (245, 245, 245))
+    tw, th = 340, int(340 * RATIO)
+    pad, lh = 14, 32
+    sw = cols * tw + (cols + 1) * pad
+    sh = 60 + rows * (th + lh + pad) + pad
+    sheet = Image.new("RGB", (sw, sh), (245, 240, 238))
     d = ImageDraw.Draw(sheet)
-    title_f = font(FONT_JP, 32)
-    d.text((pad, 20), "Four Seasons — A1縦 案内パネル サンプル20案", font=title_f, fill=(30, 30, 30))
-    small = font(FONT_JP, 16)
+    d.text((pad, 16), "Four Seasons Girls Snack — A1 おしゃれ案 20", font=F(FONT_JP, 28), fill=INK)
+    small = F(FONT_JP, 15)
     for i, (path, title) in enumerate(items):
         r, c = divmod(i, cols)
-        # wait, 5 cols 4 rows: index i -> row = i // cols
-        row, col = i // cols, i % cols
-        x = pad + col * (thumb_w + pad)
-        y = 70 + pad + row * (thumb_h + label_h + pad)
-        im = Image.open(path).convert("RGB").resize((thumb_w, thumb_h), Image.Resampling.LANCZOS)
+        x = pad + c * (tw + pad)
+        y = 55 + pad + r * (th + lh + pad)
+        im = Image.open(path).convert("RGB").resize((tw, th), Image.Resampling.LANCZOS)
         sheet.paste(im, (x, y))
-        d.text((x, y + thumb_h + 6), f"{i+1:02d} {title}", font=small, fill=(50, 50, 50))
+        d.text((x, y + th + 4), f"{i+1:02d} {title}", font=small, fill=(80, 60, 60))
     out = ROOT / "全候補_1枚まとめ.jpg"
-    sheet.save(out, "JPEG", quality=85, optimize=True)
-    print(f"contact sheet -> {out}")
+    sheet.save(out, "JPEG", quality=88, optimize=True)
     return out
 
 
-def make_viewer(items: list[tuple[str, str]]):
+def make_viewer():
     cards = "\n".join(
-        f"""    <figure>
-      <img src="panels/{name}.jpg" alt="{title}" loading="lazy"/>
-      <figcaption>{i:02d}. {title}</figcaption>
-    </figure>"""
-        for i, (name, title, _) in enumerate(LAYOUTS, start=1)
+        f'<figure><img src="panels/{n}.jpg" alt="{t}" loading="lazy"/><figcaption>{i:02d}. {t}</figcaption></figure>'
+        for i, (n, t, _) in enumerate(LAYOUTS, 1)
     )
     html = f"""<!DOCTYPE html>
-<html lang="ja">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Four Seasons A1案内パネル サンプル20案</title>
+<html lang="ja"><head><meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Four Seasons Girls Snack A1 おしゃれ案20</title>
 <style>
-  :root {{ --bg:#111; --fg:#f2f2f2; --muted:#999; --accent:#7ec8d4; }}
-  * {{ box-sizing: border-box; }}
-  body {{ margin:0; font-family: system-ui, sans-serif; background:var(--bg); color:var(--fg); }}
-  header {{ padding:24px 20px 8px; max-width:1200px; margin:0 auto; }}
-  h1 {{ font-size:1.4rem; margin:0 0 6px; }}
-  p {{ color:var(--muted); margin:0 0 16px; }}
-  .grid {{ display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:18px; padding:16px 20px 40px; max-width:1200px; margin:0 auto; }}
-  figure {{ margin:0; background:#1a1a1a; border-radius:8px; overflow:hidden; }}
-  img {{ width:100%; height:auto; display:block; aspect-ratio:594/841; object-fit:cover; }}
-  figcaption {{ padding:10px 12px; font-size:0.85rem; color:var(--accent); }}
-  a.summary {{ color:var(--accent); }}
-</style>
-</head>
-<body>
+body{{margin:0;background:#1a1416;color:#f6eee8;font-family:system-ui,sans-serif}}
+header{{padding:24px 20px;max-width:1200px;margin:0 auto}}
+h1{{font-size:1.35rem;font-weight:500;margin:0 0 8px}}
+p{{color:#c4a8a0;margin:0}}
+a{{color:#e8b0a8}}
+.grid{{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;padding:16px 20px 48px;max-width:1200px;margin:0 auto}}
+figure{{margin:0;background:#241c1e;overflow:hidden}}
+img{{width:100%;display:block;aspect-ratio:594/841;object-fit:cover}}
+figcaption{{padding:10px;font-size:.8rem;color:#e8b0a8}}
+</style></head><body>
 <header>
-  <h1>Four Seasons — A1縦 無料案内所パネル</h1>
-  <p>店内写真2枚＋ロゴで作成したサンプル20案。サイズ比 A1縦（594×841）。
-  <a class="summary" href="全候補_1枚まとめ.jpg">1枚まとめを見る</a></p>
+<h1>Four Seasons — ガールズスナック A1 おしゃれ案</h1>
+<p>方向性を刷新。写真と余白・タイポ中心の20案。
+<a href="全候補_1枚まとめ.jpg">1枚まとめ</a></p>
 </header>
-<div class="grid">
-{cards}
-</div>
-</body>
-</html>
-"""
-    path = ROOT / "見る.html"
-    path.write_text(html, encoding="utf-8")
-    print(f"viewer -> {path}")
+<div class="grid">{cards}</div>
+</body></html>"""
+    (ROOT / "見る.html").write_text(html, encoding="utf-8")
 
 
 def main():
-    print(f"Generating {len(LAYOUTS)} A1 panels at {W}×{H}…")
-    items: list[tuple[Path, str]] = []
+    print(f"Generating chic girls-snack panels {W}×{H}…")
+    items = []
     for name, title, fn in LAYOUTS:
         im = fn()
-        assert im.size == (W, H), f"{name} size {im.size}"
-        path, _ = save(im, f"{name}.jpg", title)
-        items.append((path, title))
-    make_contact_sheet(items)
-    make_viewer([(n, t) for n, t, _ in LAYOUTS])
-    # README
-    readme = ROOT / "README.md"
-    readme.write_text(
-        """# Four Seasons — A1縦 無料案内所パネル サンプル20案
+        assert im.size == (W, H), (name, im.size)
+        items.append(save(im, f"{name}.jpg", title))
+    contact_sheet(items)
+    make_viewer()
+    (ROOT / "README.md").write_text(
+        """# Four Seasons — ガールズスナック A1縦 おしゃれ案20
 
-店内写真2枚と店舗ロゴで、**A1縦（594×841mm 相当比）**の案内所掲載用パネル案を20種類作成しました。
+無料案内所向け A1縦パネル。**ガールズスナックらしい上品さ**を軸に、写真・余白・タイポ中心で20案。
 
-## 素材
-- `assets/interior_bar.jpg` … カウンター店内
-- `assets/interior_sofa.jpg` … ソファ席店内
-- `assets/logo_black.png` … 黒オーバル付きロゴ
-- `assets/logo.png` … 黒背景を透過したロゴ（写真上載せ用）
-
-## 掲載内容（全案共通）
-- Girl's Bar / Lounge Pub Snack **Four Seasons**
-- **料金** Set 50分 / カウンター席 ¥3,000 / ボックス席 ¥4,000 / TAX 20%
-- **飲み放題メニュー** 甲類・ウイスキー・リキュール各種 / 割りもの・お茶類・炭酸
+## 掲載
+- Set 50分 / カウンター席 ¥3,000 / ボックス席 ¥4,000 / TAX 20%
+- 飲み放題：甲類・ウイスキー・リキュール各種 ／ 割りもの・お茶・炭酸
 
 ## 見方
-1. **`見る.html`** をブラウザで開く
-2. または **`全候補_1枚まとめ.jpg`** で20案を一望
-3. 個別は `panels/XX_*.jpg`
+1. `見る.html`
+2. `全候補_1枚まとめ.jpg`
+3. `panels/`
 
-## 再出力
 ```bash
-cd Documents/フラット/FourSeasons_A1案内パネル
 python3 generate_panels.py
 ```
 """,
         encoding="utf-8",
     )
-    print("done.")
+    print("done")
 
 
 if __name__ == "__main__":
