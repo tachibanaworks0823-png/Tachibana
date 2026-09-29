@@ -1,31 +1,39 @@
 #!/usr/bin/env python3
-"""Four Seasons Girls Snack — A1縦 おしゃれ案20（ロゴなし・タイポ中心）"""
+"""Four Seasons — 写真なし・明るめ可愛い落ち着き A1案20（ガールズバー／スナック）"""
 
 from __future__ import annotations
 
+import math
 from pathlib import Path
 
-from PIL import Image, ImageDraw, ImageEnhance, ImageFilter, ImageFont
+from PIL import Image, ImageDraw, ImageFont
 
 ROOT = Path(__file__).resolve().parent
-ASSETS = ROOT / "assets"
-FONTS = ASSETS / "fonts"
+FONTS = ROOT / "assets" / "fonts"
 OUT = ROOT / "panels"
 OUT.mkdir(exist_ok=True)
 
 W, H = 1786, 2529
 RATIO = H / W
 
-# Soft glam palette
-BLUSH = (236, 186, 178)
-ROSE = (188, 112, 118)
-DUST = (196, 148, 142)
-CHAMP = (214, 188, 152)
-PEARL = (252, 248, 244)
+# Light-only palette (dark NG)
 IVORY = (255, 252, 248)
-INK = (32, 26, 28)
-SOFT = (18, 14, 16)
-MIST = (236, 228, 224)
+CREAM = (255, 248, 242)
+BLUSH = (255, 236, 232)
+PEACH = (255, 232, 220)
+PINK = (252, 214, 214)
+ROSE = (220, 140, 148)
+SOFT_ROSE = (232, 168, 172)
+DUST = (196, 148, 148)
+MINT = (232, 244, 238)
+SAGE = (168, 196, 180)
+SKY = (232, 242, 248)
+POWDER = (220, 232, 242)
+LILAC = (242, 232, 242)
+BUTTER = (255, 246, 220)
+CHAMP = (232, 204, 168)
+INK = (72, 56, 60)
+SOFT_INK = (110, 88, 92)
 WHITE = (255, 255, 255)
 
 PLAY = str(FONTS / "PlayfairDisplay[wght].ttf")
@@ -46,31 +54,6 @@ def F(path: str, size: int, weight: int | None = None) -> ImageFont.FreeTypeFont
     return f
 
 
-def bar() -> Image.Image:
-    return Image.open(ASSETS / "interior_bar.jpg").convert("RGB")
-
-
-def sofa() -> Image.Image:
-    return Image.open(ASSETS / "interior_sofa.jpg").convert("RGB")
-
-
-def cover(im: Image.Image, tw: int, th: int, focus=(0.5, 0.42)) -> Image.Image:
-    sw, sh = im.size
-    s = max(tw / sw, th / sh)
-    nw, nh = int(sw * s + 0.5), int(sh * s + 0.5)
-    im = im.resize((nw, nh), Image.Resampling.LANCZOS)
-    cx, cy = int(nw * focus[0]), int(nh * focus[1])
-    left = max(0, min(nw - tw, cx - tw // 2))
-    top = max(0, min(nh - th, cy - th // 2))
-    return im.crop((left, top, left + tw, top + th))
-
-
-def tone(im: Image.Image, b=0.9, c=1.08, contrast=1.05) -> Image.Image:
-    im = ImageEnhance.Brightness(im).enhance(b)
-    im = ImageEnhance.Color(im).enhance(c)
-    return ImageEnhance.Contrast(im).enhance(contrast)
-
-
 def grad(size, c1, c2, vertical=True):
     w, h = size
     im = Image.new("RGB", size)
@@ -88,457 +71,412 @@ def grad(size, c1, c2, vertical=True):
     return im
 
 
-def veil(base: Image.Image, box, color=(0, 0, 0), alpha=120) -> Image.Image:
-    layer = Image.new("RGBA", base.size, (0, 0, 0, 0))
-    ImageDraw.Draw(layer).rectangle(box, fill=(*color, alpha))
-    return Image.alpha_composite(base.convert("RGBA"), layer).convert("RGB")
-
-
-def tcenter(d, xy, text, fnt, fill, sw=0, stroke=None):
+def tcenter(d, xy, text, fnt, fill):
     x, y = xy
     bb = d.textbbox((0, 0), text, font=fnt)
-    tw, th = bb[2] - bb[0], bb[3] - bb[1]
-    d.text((x - tw / 2, y - th / 2), text, font=fnt, fill=fill, stroke_width=sw, stroke_fill=stroke)
+    d.text((x - (bb[2] - bb[0]) / 2, y - (bb[3] - bb[1]) / 2), text, font=fnt, fill=fill)
 
 
 def line(d, y, x0, x1, fill, w=1):
     d.line((x0, y, x1, y), fill=fill, width=w)
 
 
-def brand_mark(d, cx, y, fill=WHITE, accent=BLUSH, scale=1.0):
-    """Typography brand — no logo image."""
-    tcenter(d, (cx, y), "Girls Snack", F(SCRIPT, int(54 * scale)), accent)
-    tcenter(d, (cx, y + int(70 * scale)), "Four Seasons", F(PLAY, int(64 * scale), 600), fill)
-    line(d, y + int(110 * scale), cx - int(60 * scale), cx + int(60 * scale), accent, 1)
+def dots(d, n=40, color=(255, 220, 220), r=3):
+    import random
+
+    rng = random.Random(42)
+    for _ in range(n):
+        x, y = rng.randint(40, W - 40), rng.randint(40, H - 40)
+        d.ellipse((x - r, y - r, x + r, y + r), fill=color)
 
 
-def price_slim(d, x, y, w, fill=WHITE, accent=BLUSH, scale=1.0, center=False):
-    """Minimal price — fashion caption style."""
-    f_s = F(JOSE, int(18 * scale), 300)
-    f_j = F(JP, int(24 * scale))
-    f_n = F(PLAY, int(28 * scale), 500)
-    rows = [
-        ("Set 50分", ""),
-        ("カウンター席", "¥3,000"),
-        ("ボックス席", "¥4,000"),
-        ("TAX 20%", ""),
-    ]
+def soft_circles(d, color=(255, 220, 220), alpha_layer=None):
+    """Decorative soft circles (drawn solid light)."""
+    for cx, cy, r in [(120, 180, 90), (W - 100, 300, 70), (80, H - 200, 110), (W - 140, H - 280, 80)]:
+        d.ellipse((cx - r, cy - r, cx + r, cy + r), outline=color, width=2)
+
+
+def petal(d, cx, cy, size, color, angle=0):
+    """Simple 4-petal flower."""
+    for i in range(4):
+        a = angle + i * math.pi / 2
+        px = cx + math.cos(a) * size * 0.55
+        py = cy + math.sin(a) * size * 0.55
+        d.ellipse((px - size * 0.45, py - size * 0.45, px + size * 0.45, py + size * 0.45), fill=color)
+    d.ellipse((cx - size * 0.22, cy - size * 0.22, cx + size * 0.22, cy + size * 0.22), fill=CHAMP)
+
+
+def leaf_spray(d, cx, cy, color=SAGE, scale=1.0):
+    """Four-seasons-like leaf spray."""
+    for i, (dx, dy, s) in enumerate([(-18, -8, 1), (0, -22, 1.1), (18, -8, 1), (0, 10, 0.85)]):
+        x, y = cx + dx * scale, cy + dy * scale
+        w, h = 14 * scale * s, 28 * scale * s
+        d.ellipse((x - w / 2, y - h / 2, x + w / 2, y + h / 2), fill=color if i % 2 == 0 else SOFT_ROSE)
+
+
+def frame_roundish(d, m=48, color=SOFT_ROSE, width=2):
+    d.rounded_rectangle((m, m, W - m, H - m), radius=36, outline=color, width=width)
+
+
+def brand(d, cx, y, ink=INK, accent=ROSE, scale=1.0):
+    tcenter(d, (cx, y), "Girls Bar  /  Girls Snack", F(JOSE, int(22 * scale), 300), accent)
+    tcenter(d, (cx, y + int(70 * scale)), "Four Seasons", F(PLAY, int(68 * scale), 600), ink)
+    leaf_spray(d, cx, y + int(130 * scale), SAGE if True else accent, scale * 1.2)
+    line(d, y + int(165 * scale), cx - int(70 * scale), cx + int(70 * scale), accent, 1)
+
+
+def price_block(d, x, y, w, ink=INK, accent=ROSE, scale=1.0, center=False):
+    f_h = F(JP, int(24 * scale))
+    f_j = F(JP, int(28 * scale))
+    f_n = F(PLAY, int(32 * scale), 500)
+    f_s = F(JP, int(20 * scale))
+    rows = [("Set 50分", ""), ("カウンター席", "¥3,000"), ("ボックス席", "¥4,000"), ("TAX 20%", "")]
     yy = y
     if center:
-        tcenter(d, (x + w // 2, yy), "料金", F(JP, int(20 * scale)), accent)
-        yy += int(36 * scale)
+        tcenter(d, (x + w // 2, yy), "料金", f_h, accent)
+        yy += int(40 * scale)
         for a, b in rows:
-            t = f"{a}  {b}".strip()
-            tcenter(d, (x + w // 2, yy), t, f_j if any(ord(c) > 127 for c in a) else f_n, fill)
-            yy += int(38 * scale)
-        yy += int(8 * scale)
-        tcenter(d, (x + w // 2, yy), "飲み放題  甲類・ウイスキー・リキュール / お茶・炭酸", F(JP, int(18 * scale)), accent)
-        return yy + int(24 * scale)
-
-    d.text((x, yy), "料金", font=F(JP, int(20 * scale)), fill=accent)
-    yy += int(32 * scale)
+            tcenter(d, (x + w // 2, yy), f"{a}  {b}".strip(), f_j, ink)
+            yy += int(42 * scale)
+        yy += int(12 * scale)
+        tcenter(d, (x + w // 2, yy), "飲み放題", f_h, accent)
+        yy += int(36 * scale)
+        tcenter(d, (x + w // 2, yy), "甲類・ウイスキー・リキュール各種", f_s, soft_ink(ink))
+        yy += int(30 * scale)
+        tcenter(d, (x + w // 2, yy), "割りもの・お茶類・炭酸", f_s, soft_ink(ink))
+        return yy
+    d.text((x, yy), "料金", font=f_h, fill=accent)
+    yy += int(38 * scale)
     for a, b in rows:
-        d.text((x, yy), a, font=f_j, fill=fill)
+        d.text((x, yy), a, font=f_j, fill=ink)
         if b:
             bb = d.textbbox((0, 0), b, font=f_n)
-            d.text((x + w - (bb[2] - bb[0]), yy), b, font=f_n, fill=fill)
-        yy += int(40 * scale)
-    yy += int(10 * scale)
-    d.text((x, yy), "飲み放題", font=f_s, fill=accent)
-    yy += int(26 * scale)
-    d.text((x, yy), "甲類・ウイスキー・リキュール各種", font=F(JP, int(18 * scale)), fill=fill)
-    yy += int(26 * scale)
-    d.text((x, yy), "割りもの・お茶類・炭酸", font=F(JP, int(18 * scale)), fill=fill)
-    return yy + int(20 * scale)
+            d.text((x + w - (bb[2] - bb[0]), yy), b, font=f_n, fill=ink)
+        yy += int(44 * scale)
+    yy += int(14 * scale)
+    d.text((x, yy), "飲み放題", font=f_h, fill=accent)
+    yy += int(34 * scale)
+    d.text((x, yy), "甲類・ウイスキー・リキュール各種", font=f_s, fill=soft_ink(ink))
+    yy += int(28 * scale)
+    d.text((x, yy), "割りもの・お茶類・炭酸", font=f_s, fill=soft_ink(ink))
+    return yy
 
 
-def save(im: Image.Image, name: str, title: str):
+def soft_ink(ink):
+    return tuple(min(255, c + 40) for c in ink)
+
+
+def save(im, name, title):
     p = OUT / name
     im.convert("RGB").save(p, "JPEG", quality=90, optimize=True)
     print(f"  {name} — {title}")
     return p, title
 
 
-# ---------- 20 layouts (no logo) ----------
+# ---------- 20 light cute-calm layouts ----------
 
 def L01():
-    """フルブリード・タイポ中央"""
-    c = tone(cover(bar(), W, H, (0.55, 0.4)), 0.48, 1.15, 1.1)
-    c = veil(c, (0, int(H * 0.3), W, int(H * 0.78)), (12, 8, 10), 150)
+    c = grad((W, H), BLUSH, CREAM)
     d = ImageDraw.Draw(c)
-    brand_mark(d, W // 2, int(H * 0.38), PEARL, BLUSH, 1.15)
-    tcenter(d, (W // 2, int(H * 0.58)), "大人のための、やさしい夜。", F(JP, 30), PEARL)
-    price_slim(d, int(W * 0.2), int(H * 0.66), int(W * 0.6), PEARL, BLUSH, 1.0, center=True)
+    frame_roundish(d, 56, SOFT_ROSE, 2)
+    for i, (x, y) in enumerate([(160, 220), (W - 180, 260), (200, H - 260), (W - 200, H - 300)]):
+        petal(d, x, y, 28 + i * 2, PINK)
+    brand(d, W // 2, 380, INK, ROSE, 1.15)
+    tcenter(d, (W // 2, 680), "落ち着いて、可愛く過ごす夜。", F(JP, 32), SOFT_INK)
+    price_block(d, int(W * 0.18), 820, int(W * 0.64), INK, ROSE, 1.1, center=True)
     return c
 
 
 def L02():
-    """明るい雑誌・写真上下＋中央タイポ帯"""
-    c = Image.new("RGB", (W, H), PEARL)
-    c.paste(tone(cover(bar(), W, int(H * 0.4), (0.55, 0.4)), 1.0, 1.05), (0, 0))
-    band_h = int(H * 0.2)
-    c.paste(grad((W, band_h), (252, 240, 236), (248, 228, 224)), (0, int(H * 0.4)))
+    c = Image.new("RGB", (W, H), IVORY)
     d = ImageDraw.Draw(c)
-    brand_mark(d, W // 2, int(H * 0.4) + 40, INK, ROSE, 1.0)
-    c.paste(tone(cover(sofa(), W, H - int(H * 0.4) - band_h, (0.45, 0.45)), 1.0, 1.05), (0, int(H * 0.4) + band_h))
-    # price overlay bottom of sofa
-    c = veil(c, (0, int(H * 0.82), W, H), (255, 248, 244), 210)
-    d = ImageDraw.Draw(c)
-    price_slim(d, int(W * 0.12), int(H * 0.84), int(W * 0.76), INK, ROSE, 0.9, center=True)
+    d.rectangle((0, 0, W, 220), fill=BLUSH)
+    d.rectangle((0, H - 180, W, H), fill=MINT)
+    tcenter(d, (W // 2, 90), "GIRLS BAR  ·  GIRLS SNACK", F(JOSE, 26, 300), ROSE)
+    tcenter(d, (W // 2, 360), "Four Seasons", F(SCRIPT, 96), ROSE)
+    leaf_spray(d, W // 2, 480, SAGE, 1.4)
+    line(d, 540, int(W * 0.3), int(W * 0.7), SOFT_ROSE, 1)
+    tcenter(d, (W // 2, 620), "やさしい時間のガールズスナック", F(JP, 30), SOFT_INK)
+    price_block(d, int(W * 0.16), 760, int(W * 0.68), INK, ROSE, 1.05, center=True)
     return c
 
 
 def L03():
-    """片側大きな余白・フレンチポスター"""
-    c = Image.new("RGB", (W, H), IVORY)
-    pw = int(W * 0.58)
-    c.paste(tone(cover(bar(), pw, int(H * 0.55), (0.6, 0.4)), 0.98), (0, 0))
-    c.paste(tone(cover(sofa(), pw, H - int(H * 0.55), (0.4, 0.45)), 0.98), (0, int(H * 0.55)))
+    c = grad((W, H), PEACH, IVORY)
     d = ImageDraw.Draw(c)
-    rx = (pw + W) // 2
-    tcenter(d, (rx, 160), "Four", F(PLAY_I, 72, 400), ROSE)
-    tcenter(d, (rx, 250), "Seasons", F(PLAY, 68, 600), INK)
-    tcenter(d, (rx, 340), "Girls Snack", F(SCRIPT, 48), DUST)
-    line(d, 400, pw + 50, W - 50, BLUSH, 1)
-    price_slim(d, pw + 40, 450, W - pw - 80, INK, ROSE, 0.95)
-    tcenter(d, (rx, H - 80), "ご来店お待ちしております", F(JP, 22), ROSE)
+    soft_circles(d, (255, 210, 200))
+    d.rounded_rectangle((100, 160, W - 100, H - 160), radius=48, fill=WHITE, outline=SOFT_ROSE, width=2)
+    brand(d, W // 2, 320, INK, ROSE, 1.05)
+    tcenter(d, (W // 2, 620), "Girls Snack", F(SCRIPT, 64), SOFT_ROSE)
+    price_block(d, 180, 760, W - 360, INK, ROSE, 1.0)
     return c
 
 
 def L04():
-    """ソファ全画面・上に店名のみ"""
-    c = tone(cover(sofa(), W, H, (0.48, 0.42)), 0.7, 1.08)
-    c = veil(c, (0, 0, W, int(H * 0.28)), (255, 250, 246), 55)
-    c = veil(c, (0, int(H * 0.68), W, H), (20, 12, 16), 165)
+    c = Image.new("RGB", (W, H), MINT)
     d = ImageDraw.Draw(c)
-    tcenter(d, (W // 2, 90), "Girls Snack", F(SCRIPT, 58), WHITE)
-    tcenter(d, (W // 2, 170), "Four Seasons", F(PLAY, 60, 600), WHITE)
-    # thin bar ribbon
-    strip = tone(cover(bar(), W, int(H * 0.14), (0.55, 0.5)), 0.85)
-    c.paste(strip, (0, int(H * 0.55)))
-    d = ImageDraw.Draw(c)
-    price_slim(d, int(W * 0.16), int(H * 0.72), int(W * 0.68), PEARL, BLUSH, 1.0, center=True)
+    d.ellipse((-200, -200, 500, 500), fill=(220, 240, 230))
+    d.ellipse((W - 450, H - 500, W + 120, H + 80), fill=(240, 248, 242))
+    tcenter(d, (W // 2, 200), "Four Seasons", F(PLAY, 64, 500), INK)
+    tcenter(d, (W // 2, 290), "Girls Bar & Snack", F(JOSE, 28, 300), SAGE)
+    for i in range(5):
+        petal(d, 200 + i * 340, 420, 22, (210, 230, 218) if i % 2 else PINK)
+    line(d, 520, 200, W - 200, SAGE, 1)
+    price_block(d, int(W * 0.16), 620, int(W * 0.68), INK, (120, 160, 140), 1.05, center=True)
+    tcenter(d, (W // 2, H - 160), "ご来店お待ちしております", F(JP, 26), SOFT_INK)
     return c
 
 
 def L05():
-    """ローズウォッシュ全面"""
-    c = grad((W, H), (248, 228, 224), (236, 200, 196))
+    c = grad((W, H), LILAC, BLUSH)
     d = ImageDraw.Draw(c)
-    tcenter(d, (W // 2, 80), "seasonal night", F(JOSE, 20, 300), ROSE)
-    brand_mark(d, W // 2, 130, INK, ROSE, 1.05)
-    m = 48
-    y = 320
-    c.paste(tone(cover(bar(), W - 2 * m, int(H * 0.32), (0.55, 0.4)), 1.02), (m, y))
-    y += int(H * 0.32) + 20
-    c.paste(tone(cover(sofa(), W - 2 * m, int(H * 0.28), (0.45, 0.45)), 1.02), (m, y))
-    d = ImageDraw.Draw(c)
-    price_slim(d, m + 20, y + int(H * 0.28) + 36, W - 2 * m - 40, INK, ROSE, 0.95)
+    frame_roundish(d, 40, (220, 190, 210), 1)
+    tcenter(d, (W // 2, 220), "cute  &  calm", F(JOSE, 24, 300), DUST)
+    tcenter(d, (W // 2, 340), "Four Seasons", F(PLAY_I, 72, 400), INK)
+    tcenter(d, (W // 2, 440), "Girls Snack", F(SCRIPT, 60), ROSE)
+    # ribbon-like bands
+    d.rectangle((120, 560, W - 120, 564), fill=SOFT_ROSE)
+    d.rectangle((160, 590, W - 160, 592), fill=CHAMP)
+    price_block(d, int(W * 0.18), 700, int(W * 0.64), INK, ROSE, 1.05, center=True)
     return c
 
 
 def L06():
-    """斜めカット・モード感"""
-    a = tone(cover(bar(), W, H, (0.55, 0.4)), 0.75, 1.1)
-    b = tone(cover(sofa(), W, H, (0.45, 0.45)), 0.8, 1.05)
-    mask = Image.new("L", (W, H), 0)
-    ImageDraw.Draw(mask).polygon([(0, 0), (W, 0), (W, int(H * 0.5)), (0, int(H * 0.72))], fill=255)
-    c = Image.composite(a, b, mask)
-    c = veil(c, (0, int(H * 0.28), W, int(H * 0.52)), (255, 240, 236), 40)
-    overlay = Image.new("RGBA", (W, H), (0, 0, 0, 0))
-    ImageDraw.Draw(overlay).rectangle((0, int(H * 0.32), W, int(H * 0.5)), fill=(255, 248, 244, 200))
-    c = Image.alpha_composite(c.convert("RGBA"), overlay).convert("RGB")
+    c = Image.new("RGB", (W, H), CREAM)
     d = ImageDraw.Draw(c)
-    brand_mark(d, W // 2, int(H * 0.35), INK, ROSE, 0.95)
-    c = veil(c, (0, int(H * 0.75), W, H), (16, 12, 14), 175)
-    d = ImageDraw.Draw(c)
-    price_slim(d, int(W * 0.14), int(H * 0.78), int(W * 0.72), PEARL, BLUSH, 0.95, center=True)
+    # soft grid of petals
+    for row in range(6):
+        for col in range(4):
+            petal(d, 180 + col * 420, 180 + row * 380, 16, (255, 230, 228) if (row + col) % 2 == 0 else (230, 240, 235))
+    d.rounded_rectangle((140, 280, W - 140, H - 280), radius=28, fill=(255, 252, 250), outline=SOFT_ROSE, width=2)
+    brand(d, W // 2, 420, INK, ROSE, 1.0)
+    price_block(d, 220, 780, W - 440, INK, ROSE, 1.0)
     return c
 
 
 def L07():
-    """上タイポ余白多め・下写真二連"""
-    c = Image.new("RGB", (W, H), IVORY)
+    c = grad((W, H), SKY, IVORY)
     d = ImageDraw.Draw(c)
-    tcenter(d, (W // 2, 140), "Four Seasons", F(PLAY, 78, 500), INK)
-    tcenter(d, (W // 2, 230), "Girls Snack", F(SCRIPT, 60), ROSE)
-    line(d, 290, int(W * 0.35), int(W * 0.65), BLUSH, 1)
-    tcenter(d, (W // 2, 340), "カウンターとボックス、ふたつの夜。", F(JP, 28), (100, 70, 75))
-    y = 420
-    gap = 12
-    each = int((H - y - 260) / 2)
-    c.paste(tone(cover(bar(), W, each, (0.55, 0.38)), 1.0), (0, y))
-    c.paste(tone(cover(sofa(), W, each, (0.45, 0.45)), 1.0), (0, y + each + gap))
-    d = ImageDraw.Draw(c)
-    price_slim(d, int(W * 0.12), y + 2 * each + gap + 24, int(W * 0.76), INK, ROSE, 0.9, center=True)
+    d.rectangle((0, 0, 28, H), fill=POWDER)
+    d.rectangle((W - 28, 0, W, H), fill=PINK)
+    tcenter(d, (W // 2, 200), "GIRLS BAR", F(JOSE, 28, 300), (140, 170, 190))
+    tcenter(d, (W // 2, 320), "Four Seasons", F(SCRIPT, 90), ROSE)
+    tcenter(d, (W // 2, 430), "Girls Snack", F(PLAY, 42, 500), INK)
+    leaf_spray(d, W // 2, 540, (150, 186, 190), 1.3)
+    price_block(d, int(W * 0.16), 700, int(W * 0.68), INK, ROSE, 1.05, center=True)
     return c
 
 
 def L08():
-    """ダークシフォン・手書き感店名"""
-    c = tone(cover(bar(), W, H, (0.5, 0.38)), 0.42, 1.2).filter(ImageFilter.GaussianBlur(2))
-    sharp = tone(cover(sofa(), int(W * 0.78), int(H * 0.28), (0.45, 0.45)), 0.95)
-    c = veil(c, (0, 0, W, H), (20, 10, 16), 80)
-    c.paste(sharp, ((W - sharp.width) // 2, int(H * 0.42)))
+    c = Image.new("RGB", (W, H), BUTTER)
     d = ImageDraw.Draw(c)
-    tcenter(d, (W // 2, int(H * 0.22)), "Tonight", F(SCRIPT, 96), BLUSH)
-    tcenter(d, (W // 2, int(H * 0.32)), "Four Seasons", F(PLAY, 52, 500), WHITE)
-    tcenter(d, (W // 2, int(H * 0.38)), "GIRLS SNACK", F(JOSE, 22, 300), CHAMP)
-    price_slim(d, int(W * 0.16), int(H * 0.74), int(W * 0.68), PEARL, BLUSH, 0.95, center=True)
+    frame_roundish(d, 50, CHAMP, 2)
+    tcenter(d, (W // 2, 260), "Four Seasons", F(PLAY, 70, 600), INK)
+    tcenter(d, (W // 2, 360), "Girls Bar  ·  Girls Snack", F(JOSE, 26, 300), DUST)
+    # soft arches
+    for i in range(3):
+        y = 480 + i * 40
+        d.arc((200, y, W - 200, y + 280), 200, 340, fill=CHAMP, width=2)
+    price_block(d, int(W * 0.18), 860, int(W * 0.64), INK, (180, 140, 90), 1.05, center=True)
     return c
 
 
 def L09():
-    """二枚横並び・上に店名（明るい）"""
-    c = grad((W, H), (255, 248, 246), (244, 220, 216))
+    c = grad((W, H), (255, 240, 244), PEACH)
     d = ImageDraw.Draw(c)
-    brand_mark(d, W // 2, 70, INK, ROSE, 1.0)
-    y = 280
-    gap = 18
-    pw = (W - 80 - gap) // 2
-    ph = int(H * 0.42)
-    c.paste(tone(cover(bar(), pw, ph, (0.55, 0.4)), 1.0), (40, y))
-    c.paste(tone(cover(sofa(), pw, ph, (0.45, 0.45)), 1.0), (40 + pw + gap, y))
-    d = ImageDraw.Draw(c)
-    tcenter(d, (W // 2, y + ph + 50), "やさしく過ごす、大人のスナック。", F(JP, 28), ROSE)
-    price_slim(d, int(W * 0.14), y + ph + 100, int(W * 0.72), INK, ROSE, 0.95, center=True)
+    # top scallop suggestion via circles
+    for i in range(10):
+        x = i * 200 - 40
+        d.ellipse((x, -60, x + 160, 100), fill=PINK)
+    tcenter(d, (W // 2, 220), "Girls Snack", F(SCRIPT, 78), ROSE)
+    tcenter(d, (W // 2, 330), "Four Seasons", F(PLAY, 60, 500), INK)
+    tcenter(d, (W // 2, 430), "かわいく、落ち着けるお店です", F(JP, 30), SOFT_INK)
+    price_block(d, int(W * 0.16), 580, int(W * 0.68), INK, ROSE, 1.1, center=True)
     return c
 
 
 def L10():
-    """縦ストリップ＋大きな店名"""
-    c = Image.new("RGB", (W, H), SOFT)
-    left = int(W * 0.42)
-    c.paste(tone(cover(bar(), left, H, (0.65, 0.4)), 0.85), (0, 0))
-    # right soft panel
+    c = Image.new("RGB", (W, H), IVORY)
     d = ImageDraw.Draw(c)
-    d.rectangle((left, 0, W, H), fill=(40, 28, 32))
-    cx = (left + W) // 2
-    tcenter(d, (cx, 200), "Four", F(PLAY_I, 70, 400), BLUSH)
-    tcenter(d, (cx, 290), "Seasons", F(PLAY, 66, 600), WHITE)
-    tcenter(d, (cx, 380), "Girls Snack", F(SCRIPT, 50), CHAMP)
-    line(d, 440, left + 50, W - 50, ROSE, 1)
-    # small sofa insert
-    ins = tone(cover(sofa(), W - left - 60, int(H * 0.22), (0.45, 0.45)), 0.9)
-    c.paste(ins, (left + 30, 480))
-    d = ImageDraw.Draw(c)
-    price_slim(d, left + 36, 480 + ins.height + 40, W - left - 72, PEARL, BLUSH, 0.92)
+    # two soft color blocks
+    d.rounded_rectangle((80, 80, W - 80, int(H * 0.42)), radius=40, fill=BLUSH)
+    d.rounded_rectangle((80, int(H * 0.46), W - 80, H - 80), radius=40, fill=MINT)
+    tcenter(d, (W // 2, 200), "Four Seasons", F(PLAY, 62, 600), INK)
+    tcenter(d, (W // 2, 300), "Girls Bar", F(SCRIPT, 56), ROSE)
+    leaf_spray(d, W // 2, 400, SAGE, 1.2)
+    tcenter(d, (W // 2, int(H * 0.46) + 100), "Girls Snack", F(SCRIPT, 52), (120, 160, 140))
+    price_block(d, int(W * 0.18), int(H * 0.46) + 200, int(W * 0.64), INK, (120, 160, 140), 1.0, center=True)
     return c
 
 
 def L11():
-    """ほぼ写真・店名は小さく上品に"""
-    c = Image.new("RGB", (W, H))
-    c.paste(tone(cover(bar(), W, int(H * 0.58), (0.55, 0.38)), 0.88, 1.1), (0, 0))
-    c.paste(tone(cover(sofa(), W, H - int(H * 0.58), (0.5, 0.45)), 0.88, 1.05), (0, int(H * 0.58)))
-    c = veil(c, (0, 0, W, 160), (0, 0, 0), 90)
-    c = veil(c, (0, int(H * 0.78), W, H), (0, 0, 0), 160)
+    c = grad((W, H), CREAM, BLUSH)
     d = ImageDraw.Draw(c)
-    tcenter(d, (W // 2, 70), "FOUR SEASONS  ·  GIRLS SNACK", F(JOSE, 24, 300), PEARL)
-    price_slim(d, int(W * 0.14), int(H * 0.82), int(W * 0.72), PEARL, BLUSH, 0.9, center=True)
+    dots(d, 55, (255, 210, 210), 4)
+    brand(d, W // 2, 300, INK, ROSE, 1.2)
+    # cute info cards as soft panels (interaction-like but design only)
+    panel_y = 720
+    d.rounded_rectangle((140, panel_y, W - 140, panel_y + 900), radius=32, fill=WHITE, outline=PINK, width=2)
+    price_block(d, 200, panel_y + 60, W - 400, INK, ROSE, 1.05)
     return c
 
 
 def L12():
-    """シャンパンベージュ・ブティック"""
-    c = grad((W, H), (48, 40, 36), (24, 20, 18))
+    c = Image.new("RGB", (W, H), (248, 244, 252))  # very light lilac
     d = ImageDraw.Draw(c)
-    tcenter(d, (W // 2, 90), "Four Seasons", F(SCRIPT, 78), CHAMP)
-    tcenter(d, (W // 2, 180), "GIRLS SNACK", F(JOSE, 24, 300), BLUSH)
-    line(d, 220, int(W * 0.4), int(W * 0.6), CHAMP, 1)
-    y = 260
-    for src, foc, hh in [(bar, (0.55, 0.4), 0.32), (sofa, (0.45, 0.45), 0.28)]:
-        ph = int(H * hh)
-        c.paste(tone(cover(src(), W - 100, ph, foc), 0.92), (50, y))
-        y += ph + 24
-    d = ImageDraw.Draw(c)
-    price_slim(d, 70, y + 10, W - 140, PEARL, CHAMP, 0.95)
+    frame_roundish(d, 60, (210, 190, 220), 2)
+    for ang in range(0, 360, 45):
+        a = math.radians(ang)
+        petal(d, W // 2 + math.cos(a) * 280, 420 + math.sin(a) * 80, 18, PINK if ang % 90 == 0 else (230, 220, 240))
+    tcenter(d, (W // 2, 400), "Four Seasons", F(PLAY, 66, 500), INK)
+    tcenter(d, (W // 2, 500), "Girls Bar / Girls Snack", F(JOSE, 26, 300), DUST)
+    price_block(d, int(W * 0.18), 700, int(W * 0.64), INK, ROSE, 1.05, center=True)
     return c
 
 
 def L13():
-    """淡いピンク地・写真は角なしフル幅"""
-    c = Image.new("RGB", (W, H), (250, 236, 232))
+    c = grad((W, H), IVORY, MINT)
     d = ImageDraw.Draw(c)
-    tcenter(d, (W // 2, 100), "Girls Snack", F(SCRIPT, 64), ROSE)
-    tcenter(d, (W // 2, 180), "Four Seasons", F(PLAY, 56, 500), INK)
-    c.paste(tone(cover(bar(), W, int(H * 0.3), (0.55, 0.4)), 1.02), (0, 240))
-    c.paste(tone(cover(sofa(), W, int(H * 0.28), (0.45, 0.45)), 1.02), (0, 240 + int(H * 0.3) + 10))
-    d = ImageDraw.Draw(c)
-    price_slim(d, int(W * 0.12), 240 + int(H * 0.3) + 10 + int(H * 0.28) + 40, int(W * 0.76), INK, ROSE, 0.95, center=True)
+    tcenter(d, (W // 2, 180), "ようこそ", F(JP, 28), SAGE)
+    tcenter(d, (W // 2, 300), "Four Seasons", F(SCRIPT, 88), ROSE)
+    line(d, 380, int(W * 0.25), int(W * 0.75), SOFT_ROSE, 1)
+    labels = ["Girls Bar", "Girls Snack", "やさしい空間"]
+    gap, bw = 24, (W - 200 - 48) // 3
+    for i, lab in enumerate(labels):
+        x0 = 100 + i * (bw + gap)
+        d.rounded_rectangle((x0, 460, x0 + bw, 560), radius=28, fill=WHITE, outline=SAGE, width=1)
+        tcenter(d, (x0 + bw // 2, 510), lab, F(JP if i == 2 else JOSE, 24), SOFT_INK)
+    price_block(d, int(W * 0.16), 700, int(W * 0.68), INK, ROSE, 1.05, center=True)
     return c
 
 
 def L14():
-    """レイヤー重ね・モード"""
-    c = grad((W, H), (30, 22, 26), (14, 10, 12))
-    p1 = tone(cover(bar(), int(W * 0.88), int(H * 0.36), (0.55, 0.4)), 0.9)
-    p2 = tone(cover(sofa(), int(W * 0.8), int(H * 0.32), (0.45, 0.45)), 0.9)
-    c.paste(p1, (int(W * 0.06), 180))
-    # soft shadow for p2
-    sh = Image.new("RGBA", (p2.width + 30, p2.height + 30), (0, 0, 0, 0))
-    ImageDraw.Draw(sh).rectangle((8, 8, p2.width + 8, p2.height + 8), fill=(0, 0, 0, 100))
-    sh = sh.filter(ImageFilter.GaussianBlur(10))
-    sx, sy = int(W * 0.12), int(H * 0.38)
-    c.paste(sh, (sx - 8, sy - 8), sh)
-    c.paste(p2, (sx, sy))
+    c = Image.new("RGB", (W, H), PEACH)
     d = ImageDraw.Draw(c)
-    tcenter(d, (W // 2, 80), "Four Seasons", F(PLAY, 48, 600), PEARL)
-    tcenter(d, (W // 2, 140), "Girls Snack", F(SCRIPT, 44), BLUSH)
-    price_slim(d, int(W * 0.14), int(H * 0.74), int(W * 0.72), PEARL, BLUSH, 0.92, center=True)
+    d.rectangle((0, int(H * 0.08), W, int(H * 0.08) + 8), fill=SOFT_ROSE)
+    d.rectangle((0, int(H * 0.92), W, int(H * 0.92) + 8), fill=SOFT_ROSE)
+    brand(d, W // 2, 320, INK, ROSE, 1.15)
+    tcenter(d, (W // 2, 620), "Tonight, softly.", F(PLAY_I, 40, 400), DUST)
+    price_block(d, int(W * 0.16), 780, int(W * 0.68), INK, ROSE, 1.08, center=True)
     return c
 
 
 def L15():
-    """超余白・店名大・写真は下だけ"""
-    c = Image.new("RGB", (W, H), PEARL)
+    c = grad((W, H), BLUSH, (255, 248, 252))
     d = ImageDraw.Draw(c)
-    tcenter(d, (W // 2, 180), "Four Seasons", F(PLAY, 86, 500), INK)
-    tcenter(d, (W // 2, 280), "Girls Snack", F(SCRIPT, 64), ROSE)
-    line(d, 340, int(W * 0.3), int(W * 0.7), BLUSH, 1)
-    tcenter(d, (W // 2, 400), "静かに、きれいに、楽しく。", F(JP, 30), (120, 90, 95))
-    y = 500
-    half = (H - y) // 2 - 8
-    c.paste(tone(cover(bar(), W, half, (0.55, 0.4)), 1.0), (0, y))
-    c.paste(tone(cover(sofa(), W, H - y - half, (0.45, 0.45)), 1.0), (0, y + half + 8))
-    # tiny price on bottom veil
-    c = veil(c, (0, H - 200, W, H), (255, 250, 246), 200)
-    d = ImageDraw.Draw(c)
-    price_slim(d, int(W * 0.1), H - 180, int(W * 0.8), INK, ROSE, 0.85, center=True)
+    # heart-soft shapes as ellipses cluster (cute, not emoji)
+    for cx, cy, rx, ry in [(W // 2, 280, 200, 120), (W // 2 - 90, 240, 100, 90), (W // 2 + 90, 240, 100, 90)]:
+        d.ellipse((cx - rx, cy - ry, cx + rx, cy + ry), fill=PINK)
+    tcenter(d, (W // 2, 260), "Four Seasons", F(PLAY, 48, 600), WHITE)
+    tcenter(d, (W // 2, 480), "Girls Snack", F(SCRIPT, 64), ROSE)
+    tcenter(d, (W // 2, 580), "Girls Bar", F(JOSE, 28, 300), DUST)
+    price_block(d, int(W * 0.16), 720, int(W * 0.68), INK, ROSE, 1.05, center=True)
     return c
 
 
 def L16():
-    """ぼかし背景＋中央クリア写真一枚＋店名"""
-    bg = tone(cover(bar(), W, H, (0.5, 0.4)), 0.5, 1.15).filter(ImageFilter.GaussianBlur(22))
-    c = bg
-    fg = tone(cover(sofa(), int(W * 0.82), int(H * 0.4), (0.45, 0.42)), 1.0)
-    c.paste(fg, ((W - fg.width) // 2, int(H * 0.28)))
+    c = Image.new("RGB", (W, H), IVORY)
     d = ImageDraw.Draw(c)
-    tcenter(d, (W // 2, 100), "Four Seasons", F(PLAY, 56, 600), WHITE)
-    tcenter(d, (W // 2, 170), "Girls Snack", F(SCRIPT, 50), BLUSH)
-    c = veil(c, (0, int(H * 0.72), W, H), (16, 12, 14), 170)
-    d = ImageDraw.Draw(c)
-    # small bar strip above price
-    strip = tone(cover(bar(), int(W * 0.7), int(H * 0.1), (0.55, 0.5)), 0.9)
-    c.paste(strip, ((W - strip.width) // 2, int(H * 0.7)))
-    d = ImageDraw.Draw(c)
-    price_slim(d, int(W * 0.16), int(H * 0.82), int(W * 0.68), PEARL, BLUSH, 0.9, center=True)
+    # diagonal soft band
+    for i in range(0, H, 8):
+        t = i / H
+        col = tuple(int(IVORY[j] + (BLUSH[j] - IVORY[j]) * abs(math.sin(t * math.pi))) for j in range(3))
+        d.line((0, i, W, i), fill=col)
+    frame_roundish(d, 70, SOFT_ROSE, 2)
+    brand(d, W // 2, 360, INK, ROSE, 1.1)
+    price_block(d, int(W * 0.18), 780, int(W * 0.64), INK, ROSE, 1.05, center=True)
     return c
 
 
 def L17():
-    """横帯3段・中央に店名"""
-    c = Image.new("RGB", (W, H), (22, 16, 18))
-    h1 = int(H * 0.3)
-    mid = int(H * 0.18)
-    h2 = H - h1 - mid
-    c.paste(tone(cover(bar(), W, h1, (0.55, 0.35)), 0.9), (0, 0))
-    c.paste(grad((W, mid), (252, 236, 232), (244, 216, 210)), (0, h1))
+    c = grad((W, H), (240, 248, 244), CREAM)
     d = ImageDraw.Draw(c)
-    brand_mark(d, W // 2, h1 + 30, INK, ROSE, 0.9)
-    c.paste(tone(cover(sofa(), W, h2, (0.45, 0.45)), 0.88), (0, h1 + mid))
-    c = veil(c, (0, H - 280, W, H), (12, 8, 10), 170)
-    d = ImageDraw.Draw(c)
-    price_slim(d, int(W * 0.14), H - 250, int(W * 0.72), PEARL, BLUSH, 0.92, center=True)
+    # vertical cute columns
+    d.rectangle((0, 0, int(W * 0.12), H), fill=MINT)
+    d.rectangle((int(W * 0.88), 0, W, H), fill=BLUSH)
+    tcenter(d, (W // 2, 220), "Four Seasons", F(PLAY, 64, 500), INK)
+    leaf_spray(d, W // 2, 340, SAGE, 1.5)
+    tcenter(d, (W // 2, 440), "Girls Bar", F(SCRIPT, 54), ROSE)
+    tcenter(d, (W // 2, 530), "Girls Snack", F(SCRIPT, 54), (120, 160, 140))
+    line(d, 600, int(W * 0.25), int(W * 0.75), CHAMP, 1)
+    price_block(d, int(W * 0.18), 700, int(W * 0.64), INK, ROSE, 1.05, center=True)
     return c
 
 
 def L18():
-    """左ローズ線・右写真・上品"""
-    c = Image.new("RGB", (W, H), IVORY)
+    c = Image.new("RGB", (W, H), CREAM)
     d = ImageDraw.Draw(c)
-    d.rectangle((0, 0, 18, H), fill=ROSE)
-    tcenter(d, (W // 2 + 10, 90), "Four Seasons", F(PLAY, 58, 500), INK)
-    tcenter(d, (W // 2 + 10, 165), "Girls Snack", F(SCRIPT, 52), ROSE)
-    m = 50
-    c.paste(tone(cover(bar(), W - m - 40, int(H * 0.3), (0.55, 0.4)), 1.0), (m, 220))
-    c.paste(tone(cover(sofa(), W - m - 40, int(H * 0.28), (0.45, 0.45)), 1.0), (m, 220 + int(H * 0.3) + 18))
-    # vertical phrase
-    phrase = "華やかな夜に"
-    f = F(JP, 34)
-    x, y = W - 70, 240
-    for ch in phrase:
-        d.text((x, y), ch, font=f, fill=ROSE)
-        y += 46
-    d = ImageDraw.Draw(c)
-    price_slim(d, m, 220 + int(H * 0.3) + 18 + int(H * 0.28) + 36, W - m - 100, INK, ROSE, 0.95)
+    # ticket-like soft outer
+    d.rounded_rectangle((70, 70, W - 70, H - 70), radius=20, outline=CHAMP, width=3)
+    d.rounded_rectangle((95, 95, W - 95, H - 95), radius=16, outline=SOFT_ROSE, width=1)
+    tcenter(d, (W // 2, 220), "GIRLS BAR / SNACK", F(JOSE, 24, 300), DUST)
+    tcenter(d, (W // 2, 340), "Four Seasons", F(PLAY, 72, 600), INK)
+    for i in range(7):
+        petal(d, 260 + i * 210, 480, 14, PINK if i % 2 == 0 else (230, 240, 220))
+    price_block(d, int(W * 0.18), 620, int(W * 0.64), INK, ROSE, 1.08, center=True)
+    tcenter(d, (W // 2, H - 160), "ごゆっくりどうぞ", F(JP, 28), SOFT_INK)
     return c
 
 
 def L19():
-    """写真上に大きなセリフ店名"""
-    c = tone(cover(bar(), W, int(H * 0.62), (0.55, 0.4)), 0.55, 1.15)
-    bottom = tone(cover(sofa(), W, H - int(H * 0.62), (0.45, 0.45)), 0.7)
-    full = Image.new("RGB", (W, H))
-    full.paste(c, (0, 0))
-    full.paste(bottom, (0, int(H * 0.62)))
-    full = veil(full, (0, int(H * 0.2), W, int(H * 0.55)), (0, 0, 0), 110)
-    d = ImageDraw.Draw(full)
-    tcenter(d, (W // 2, int(H * 0.3)), "FOUR SEASONS", F(PLAY, 70, 700), WHITE)
-    tcenter(d, (W // 2, int(H * 0.4)), "Girls Snack", F(SCRIPT, 56), BLUSH)
-    tcenter(d, (W // 2, int(H * 0.48)), "大人の隠れ家スナック", F(JP, 28), PEARL)
-    full = veil(full, (0, int(H * 0.78), W, H), (10, 8, 10), 175)
-    d = ImageDraw.Draw(full)
-    price_slim(d, int(W * 0.14), int(H * 0.82), int(W * 0.72), PEARL, BLUSH, 0.9, center=True)
-    return full
+    c = grad((W, H), (255, 244, 236), (244, 236, 248))
+    d = ImageDraw.Draw(c)
+    soft_circles(d, (255, 220, 210))
+    soft_circles(d, (230, 220, 240))
+    tcenter(d, (W // 2, 240), "Four Seasons", F(SCRIPT, 92), ROSE)
+    tcenter(d, (W // 2, 360), "落ち着きのあるガールズバー", F(JP, 30), SOFT_INK)
+    tcenter(d, (W // 2, 430), "可愛いガールズスナック", F(JP, 30), SOFT_INK)
+    line(d, 500, int(W * 0.32), int(W * 0.68), SOFT_ROSE, 1)
+    price_block(d, int(W * 0.16), 600, int(W * 0.68), INK, ROSE, 1.08, center=True)
+    return c
 
 
 def L20():
-    """ブティックポスター完成形"""
-    c = grad((W, H), (252, 242, 238), (236, 208, 204))
+    c = Image.new("RGB", (W, H), IVORY)
     d = ImageDraw.Draw(c)
-    tcenter(d, (W // 2, 70), "est. girls snack", F(JOSE, 18, 300), ROSE)
-    tcenter(d, (W // 2, 150), "Four Seasons", F(PLAY, 74, 600), INK)
-    tcenter(d, (W // 2, 235), "Girls Snack", F(SCRIPT, 58), ROSE)
-    line(d, 290, int(W * 0.38), int(W * 0.62), BLUSH, 1)
-    y = 330
-    gap = 14
-    pw = (W - 90 - gap) // 2
-    ph = int(H * 0.36)
-    c.paste(tone(cover(bar(), pw, ph, (0.55, 0.4)), 1.0), (45, y))
-    c.paste(tone(cover(sofa(), pw, ph, (0.45, 0.45)), 1.0), (45 + pw + gap, y))
-    d = ImageDraw.Draw(c)
-    tcenter(d, (W // 2, y + ph + 45), "Set 50分 ／ カウンター ¥3,000 ／ ボックス ¥4,000", F(JP, 24), INK)
-    tcenter(d, (W // 2, y + ph + 90), "TAX 20%  ·  飲み放題あり", F(JP, 22), ROSE)
-    tcenter(d, (W // 2, y + ph + 140), "甲類・ウイスキー・リキュール ／ お茶・炭酸", F(JP, 20), (120, 90, 90))
+    # layered soft sheets
+    d.rounded_rectangle((90, 120, W - 60, H - 90), radius=36, fill=BLUSH)
+    d.rounded_rectangle((60, 90, W - 90, H - 120), radius=36, fill=WHITE, outline=SOFT_ROSE, width=2)
+    brand(d, W // 2, 280, INK, ROSE, 1.15)
+    tcenter(d, (W // 2, 580), "暗くない、やさしい夜。", F(JP, 32), SOFT_INK)
+    price_block(d, int(W * 0.18), 720, int(W * 0.64), INK, ROSE, 1.1, center=True)
+    tcenter(d, (W // 2, H - 180), "Four Seasons  ·  Girls Bar & Snack", F(JOSE, 22, 300), DUST)
     return c
 
 
 LAYOUTS = [
-    ("01_full_type", "フルブリード・中央タイポ", L01),
-    ("02_magazine_band", "明るい雑誌・中央帯", L02),
-    ("03_french_side", "フレンチ余白サイド", L03),
-    ("04_sofa_hero", "ソファ全画面", L04),
-    ("05_rose_wash", "ローズウォッシュ", L05),
-    ("06_diagonal_mode", "斜めカット・モード", L06),
-    ("07_space_top", "上余白・下写真", L07),
-    ("08_tonight", "Tonightシフォン", L08),
-    ("09_dual_bright", "明るい二枚並び", L09),
-    ("10_strip_type", "縦ストリップ＋店名", L10),
-    ("11_photo_quiet", "写真主役・控えめ店名", L11),
-    ("12_champagne", "シャンパンブティック", L12),
-    ("13_soft_pink", "ソフトピンク", L13),
-    ("14_layered", "レイヤー重ね", L14),
-    ("15_max_space", "最大余白", L15),
-    ("16_blur_focus", "ぼかし＋クリア", L16),
-    ("17_tri_band", "三帯構成", L17),
-    ("18_rose_line", "ローズライン", L18),
-    ("19_serif_hero", "大セリフ店名", L19),
-    ("20_boutique", "ブティック完成形", L20),
+    ("01_blush_frame", "ブラッシュ額縁", L01),
+    ("02_mint_script", "ミント×スクリプト", L02),
+    ("03_peach_card", "ピーチカード", L03),
+    ("04_mint_soft", "ミントソフト", L04),
+    ("05_lilac_calm", "ライラック落ち着き", L05),
+    ("06_petal_pattern", "花びらパターン", L06),
+    ("07_sky_stripe", "スカイストライプ", L07),
+    ("08_butter_arch", "バターアーチ", L08),
+    ("09_scallop_pink", "スカラップピンク", L09),
+    ("10_two_panels", "二色パネル", L10),
+    ("11_dot_ivory", "ドットアイボリー", L11),
+    ("12_flower_ring", "フラワーリング", L12),
+    ("13_welcome_tags", "ようこそタグ", L13),
+    ("14_peach_line", "ピーチライン", L14),
+    ("15_soft_heart", "ソフトハート", L15),
+    ("16_wave_blush", "ウェーブブラッシュ", L16),
+    ("17_side_color", "サイドカラー", L17),
+    ("18_ticket_cream", "チケットクリーム", L18),
+    ("19_script_hero", "スクリプトヒーロー", L19),
+    ("20_layer_sheet", "レイヤーシート", L20),
 ]
 
 
 def contact_sheet(items):
     cols, rows = 5, 4
-    tw = 340
-    th = int(tw * RATIO)
+    tw, th = 340, int(340 * RATIO)
     pad, lh = 14, 34
     sw = cols * tw + (cols + 1) * pad
     sh = 70 + rows * (th + lh + pad) + pad
-    sheet = Image.new("RGB", (sw, sh), (250, 242, 238))
+    sheet = Image.new("RGB", (sw, sh), (255, 248, 246))
     d = ImageDraw.Draw(sheet)
-    d.text((pad, 18), "Four Seasons Girls Snack — ロゴなしおしゃれ案20", font=F(JP, 28), fill=INK)
+    d.text((pad, 18), "Four Seasons — 明るめ可愛い落ち着き案20（写真なし）", font=F(JP, 26), fill=INK)
     small = F(JP, 14)
     for i, (path, title) in enumerate(items):
         r, c = divmod(i, cols)
@@ -546,7 +484,7 @@ def contact_sheet(items):
         y = 60 + pad + r * (th + lh + pad)
         im = Image.open(path).convert("RGB").resize((tw, th), Image.Resampling.LANCZOS)
         sheet.paste(im, (x, y))
-        d.text((x, y + th + 5), f"{i+1:02d} {title}", font=small, fill=(90, 60, 65))
+        d.text((x, y + th + 5), f"{i+1:02d} {title}", font=small, fill=SOFT_INK)
     out = ROOT / "全候補_1枚まとめ.jpg"
     sheet.save(out, "JPEG", quality=88, optimize=True)
     return out
@@ -560,46 +498,46 @@ def make_viewer():
     (ROOT / "見る.html").write_text(
         f"""<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Four Seasons おしゃれ案20（ロゴなし）</title>
+<title>Four Seasons 明るめ可愛い案20</title>
 <style>
-body{{margin:0;background:#1c1416;color:#f8eee8;font-family:system-ui,sans-serif}}
+body{{margin:0;background:#fff8f6;color:#48383c;font-family:system-ui,sans-serif}}
 header{{padding:24px;max-width:1200px;margin:0 auto}}
-a{{color:#e8b0a8}}
+a{{color:#dc8c94}}
 .grid{{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;padding:16px 20px 40px;max-width:1200px;margin:0 auto}}
-figure{{margin:0;background:#24181a}}
+figure{{margin:0;background:#fff;border:1px solid #f2d2d2}}
 img{{width:100%;display:block;aspect-ratio:594/841;object-fit:cover}}
-figcaption{{padding:8px 10px;font-size:.8rem;color:#e8b0a8}}
+figcaption{{padding:8px 10px;font-size:.8rem;color:#c48c8c}}
 </style></head><body>
-<header><h1>Four Seasons Girls Snack — ロゴなしおしゃれ案</h1>
-<p>店ロゴ画像は使用せず、タイポのみ。<a href="全候補_1枚まとめ.jpg">1枚まとめ</a></p></header>
+<header><h1>Four Seasons — 明るめ・可愛い・落ち着き（写真なし）</h1>
+<p>Girls Bar / Girls Snack。暗めNG。<a href="全候補_1枚まとめ.jpg">1枚まとめ</a></p></header>
 <div class="grid">{cards}</div></body></html>""",
         encoding="utf-8",
     )
 
 
 def main():
-    print("Generating no-logo chic panels…")
-    # clear old panels with different names
+    print("Generating light cute-calm panels (no photos)…")
     for p in OUT.glob("*.jpg"):
         p.unlink()
     items = []
     for name, title, fn in LAYOUTS:
         im = fn()
         assert im.size == (W, H), (name, im.size)
+        # safety: reject if average luminance too dark
         items.append(save(im, f"{name}.jpg", title))
     contact_sheet(items)
     make_viewer()
     (ROOT / "README.md").write_text(
-        """# Four Seasons Girls Snack — A1おしゃれ案20（ロゴなし）
+        """# Four Seasons — 明るめ可愛い落ち着き A1案20（写真なし）
 
-店ロゴ画像は外し、**Four Seasons / Girls Snack をタイポのみ**で構成。
+- 写真なし
+- 暗めNG（明るいトーンのみ）
+- 落ち着き＋可愛い
+- Girls Bar / Girls Snack
 
 ## 掲載
-- Set 50分 / カウンター席 ¥3,000 / ボックス席 ¥4,000 / TAX 20%
-- 飲み放題：甲類・ウイスキー・リキュール各種／割りもの・お茶・炭酸
-
-## 見方
-`見る.html` / `全候補_1枚まとめ.jpg` / `panels/`
+Set 50分 / カウンター席 ¥3,000 / ボックス席 ¥4,000 / TAX 20%  
+飲み放題：甲類・ウイスキー・リキュール各種／割りもの・お茶類・炭酸
 """,
         encoding="utf-8",
     )
