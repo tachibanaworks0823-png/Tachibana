@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CLUB Rain Forest — A1 料金パネル 20案（清楚ポートレート入り）</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Cinzel:wght@400;500;600&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Great+Vibes&family=Josefin+Sans:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+
+  :root { --w: 900px; --h: 1273px; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #e8e8e8; font-family: "Noto Serif CJK JP", "Noto Serif CJK", serif; padding: 32px; }
+  .gallery-note { max-width: 900px; margin: 0 auto 28px; font-family: "Noto Sans CJK JP", sans-serif; color: #333; }
+  .gallery-note h1 { font-size: 22px; margin-bottom: 6px; }
+  .gallery-note p { font-size: 13px; color: #666; line-height: 1.6; }
+  .panel-wrap { width: var(--w); margin: 0 auto 48px; }
+  .label { font-family: "Noto Sans CJK JP", sans-serif; font-size: 13px; color: #444; margin: 0 0 10px; }
+  .panel {
+    position: relative; width: var(--w); height: var(--h); overflow: hidden; background: #fff;
+    box-shadow: 0 8px 28px rgba(0,0,0,0.12);
+    display: flex; flex-direction: column; align-items: center;
+  }
+  .panel img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center 18%; }
+  .panel .brand-en { letter-spacing: 0.06em; }
+  .panel .brand-jp { letter-spacing: 0.35em; font-size: 15px; color: #7a847a; }
+  .panel .system { letter-spacing: 0.45em; font-family: "Cinzel", serif; font-size: 18px; color: #c4a574; }
+  .panel .unit { margin-top: 10px; font-size: 17px; color: #555; }
+  .panel .prices { width: 78%; display: flex; flex-direction: column; gap: 14px; margin-top: 22px; }
+  .panel .price-row { display: flex; justify-content: space-between; align-items: baseline; width: 100%; font-size: 22px; }
+  .panel .price-row .t { color: #666; letter-spacing: 0.04em; }
+  .panel .price-row .p { font-family: "Cormorant Garamond", "Noto Serif CJK JP", serif; font-size: 30px; font-weight: 600; color: #1a1a1a; }
+  .panel .tax { margin-top: auto; margin-bottom: 36px; font-size: 14px; color: #999; letter-spacing: 0.18em; }
+  .photo-fade {
+    position: absolute; left: 0; right: 0; bottom: 0; height: 45%;
+    background: linear-gradient(180deg, transparent, rgba(255,255,255,0.92) 70%, #fff);
+    pointer-events: none;
+  }
+
+  /* shared photo blocks */
+  .photo-top, .photo-band, .photo-soft, .photo-hero, .photo-mist, .dual-photo, .split-photo, .mag-photo {
+    position: relative; width: 100%; overflow: hidden; flex-shrink: 0;
+  }
+  .photo-top { height: 48%; }
+  .photo-band { height: 42%; }
+  .photo-soft { position: relative; width: 100%; height: 46%; opacity: 1; flex-shrink: 0; }
+  .photo-soft img { object-position: center 18%; }
+  .layout-side_fade .content-over {
+    position: relative; z-index: 2; padding-top: 12px;
+    background: transparent;
+  }
+  .layout-side_fade .photo-soft { margin-top: 56px; width: calc(100% - 120px); height: 40%; }
+  .photo-hero { height: 52%; }
+  .photo-mist { height: 46%; }
+  .dual-photo { height: 50%; }
+  /* ===== Panel 10 fixed layout ===== */
+  .panel.p10 {
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+  }
+  .panel.p10 .dual-photo {
+    height: 44%;
+    flex: 0 0 44%;
+    position: relative;
+    overflow: hidden;
+  }
+  .panel.p10 .dual-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 10%;
+  }
+  .panel.p10 .dual-photo .photo-fade {
+    height: 28%;
+    background: linear-gradient(180deg, transparent, #fff);
+  }
+  .panel.p10 .dual-body {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    padding: 8px 48px 16px !important;
+    gap: 0;
+  }
+  .panel.p10 .brand-en {
+    font-family: "Cormorant Garamond", serif;
+    font-size: 72px !important;
+    font-weight: 600;
+    color: #1f2a22;
+    margin-top: 0 !important;
+    letter-spacing: 0.02em;
+    line-height: 1.05;
+  }
+  .panel.p10 .brand-jp {
+    font-size: 18px !important;
+    margin-top: 8px !important;
+    letter-spacing: 0.45em;
+    color: #6a756c;
+  }
+  .panel.p10 .divider {
+    height: 1px;
+    width: 70%;
+    background: linear-gradient(90deg, transparent, #c9b896, transparent);
+    margin: 12px 0 !important;
+  }
+  .panel.p10 .system {
+    font-family: "Cinzel", serif;
+    font-size: 16px;
+    letter-spacing: 0.45em;
+    color: #c4a574;
+  }
+  .panel.p10 .unit {
+    margin-top: 8px;
+    font-size: 17px;
+    color: #555;
+  }
+  .panel.p10 .price-block {
+    width: 82%;
+    margin-top: 14px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .panel.p10 .prices {
+    width: 100% !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    gap: 0 !important;
+  }
+  .panel.p10 .price-row {
+    display: grid !important;
+    grid-template-columns: 1.2fr 1fr;
+    padding: 12px 8px !important;
+    border-top: 1px solid #eee;
+    width: 100%;
+    font-size: 22px;
+  }
+  .panel.p10 .price-row:last-of-type {
+    border-bottom: 1px solid #eee;
+  }
+  .panel.p10 .price-row .p {
+    text-align: right;
+    font-size: 32px !important;
+    font-family: "Cormorant Garamond", serif;
+    font-weight: 600;
+  }
+  .panel.p10 .tax {
+    margin-top: 14px !important;
+    margin-bottom: 0 !important;
+    font-size: 16px !important;
+    color: #777 !important;
+    letter-spacing: 0.18em;
+  }
+  .panel.p10 .bottom-banner {
+    width: 100%;
+    height: 20%;
+    flex: 0 0 20%;
+    margin-top: auto;
+    overflow: hidden;
+    line-height: 0;
+  }
+  .panel.p10 .bottom-banner img {
+    width: 100%;
+    height: 100%;
+    object-fit: fill;
+    display: block;
+  }
+  .split-photo { height: 44%; border-bottom: 1px solid #e4e6ea; }
+  .mag-photo { height: 34%; }
+  .photo-inset {
+    width: 62%; height: 340px; overflow: hidden; margin: 56px auto 18px; border-radius: 2px;
+    border: 1px solid rgba(143,175,150,0.45);
+  }
+  .photo-inset.tall { width: 70%; height: 300px; margin: 24px auto 16px; border: 1px solid #ddd5c4; }
+  .photo-round {
+    width: 280px; height: 340px; overflow: hidden; border-radius: 140px 140px 8px 8px;
+    margin-top: 56px; margin-bottom: 18px; border: 1px solid #ebd4d4;
+  }
+  .circle-photo {
+    width: 260px; height: 260px; border-radius: 50%; overflow: hidden; margin-top: 64px; margin-bottom: 20px;
+    border: 1px solid rgba(184,149,106,0.45); box-shadow: 0 8px 24px rgba(80,60,30,0.08);
+  }
+  .circle-photo.sm { width: 220px; height: 220px; margin-top: 72px; }
+  .circle-photo img, .photo-round img, .photo-inset img, .card-photo img, .arch-photo img, .sheet-photo img, .jp-photo img {
+    width: 100%; height: 100%; object-fit: cover; object-position: center 15%;
+  }
+  .content, .content-over, .body, .mid, .split-content, .mist-content, .dual-body, .wash-content {
+    width: 100%; display: flex; flex-direction: column; align-items: center; flex: 1; padding: 8px 56px 0;
+  }
+  .content-over { position: relative; z-index: 2; padding-top: 72px; background: linear-gradient(180deg, rgba(255,255,255,0.55), #fff 28%); }
+
+  /* 01 */
+  .p01 { background: linear-gradient(180deg,#fff,#fafafa); }
+  .p01 .frame-outer { position:absolute; inset:28px; border:1px solid #c4a574; pointer-events:none; z-index:5; }
+  .p01 .photo-top { margin-top: 40px; width: calc(100% - 80px); height: 42%; }
+  .p01 .brand-en { font-family:"Cormorant Garamond",serif; font-size:48px; font-weight:500; color:#2a3d2e; margin-top:8px; }
+  .p01 .ornament { width:100px; height:1px; background:linear-gradient(90deg,transparent,#c4a574,transparent); margin:14px 0; }
+  .p01 .tax { padding:8px 24px; border:1px solid #e5d9c5; }
+
+  /* 02 */
+  .p02 { background: radial-gradient(ellipse at 50% 20%,#fffef9,#f7f2e8 80%); padding: 0 48px 24px; }
+  .p02 .corner { position:absolute; width:80px; height:80px; }
+  .p02 .c-tl { top:40px; left:40px; border-top:1.5px solid #b8956a; border-left:1.5px solid #b8956a; }
+  .p02 .c-tr { top:40px; right:40px; border-top:1.5px solid #b8956a; border-right:1.5px solid #b8956a; }
+  .p02 .c-bl { bottom:40px; left:40px; border-bottom:1.5px solid #b8956a; border-left:1.5px solid #b8956a; }
+  .p02 .c-br { bottom:40px; right:40px; border-bottom:1.5px solid #b8956a; border-right:1.5px solid #b8956a; }
+  .p02 .brand-en { font-family:"Playfair Display",serif; font-size:44px; color:#3d3326; }
+  .p02 .price-row { border-bottom:1px solid rgba(184,149,106,0.3); padding-bottom:10px; }
+
+  /* 03 */
+  .p03 { background:#fff; }
+  .p03 .brand-on-photo { position:absolute; top:34%; left:0; right:0; z-index:3; text-align:center; }
+  .p03 .brand-en { font-family:"Cormorant Garamond",serif; font-size:48px; font-weight:600; color:#2f4a36; text-shadow:0 1px 0 rgba(255,255,255,0.8); }
+  .p03 .body { padding-top: 28px; }
+  .p03 .price-row { background:#f6faf7; padding:16px 22px; border-left:3px solid #8faf96; }
+  .p03 .tax { background:#f0f5f1; padding:10px 28px; }
+
+  /* 04 */
+  .p04 { background: linear-gradient(165deg,#fff,#f5f6f8 60%,#eef0f3); }
+  .p04 .side-rule { position:absolute; top:100px; bottom:100px; width:1px; background:linear-gradient(180deg,transparent,#b8c0cc,transparent); z-index:3; }
+  .p04 .sr-l { left:48px; } .p04 .sr-r { right:48px; }
+  .p04 .brand-en { font-family:"Libre Baskerville",serif; font-size:40px; color:#2a3340; margin-top:48px; }
+  .p04 .diamond { width:7px; height:7px; background:#a8b0bc; transform:rotate(45deg); margin:16px 0; }
+
+  /* 05 */
+  .p05 { display:grid; grid-template-rows:auto 1fr; padding:0; }
+  .p05 .hero-brand { position:absolute; left:0; right:0; bottom:28px; text-align:center; z-index:2; }
+  .p05 .brand-en { font-family:"Playfair Display",serif; font-size:52px; font-weight:600; color:#fff; text-shadow:0 2px 16px rgba(0,0,0,0.35); }
+  .p05 .brand-jp { color:rgba(255,255,255,0.9); }
+  .p05 .photo-fade { background: linear-gradient(180deg, transparent 30%, rgba(20,20,20,0.45) 100%); height:55%; }
+  .p05 .mid { padding: 28px 56px 0; }
+  .p05 .system { color:#1c1c1c; font-size:20px; }
+  .p05 .price-row { border-bottom:1px dotted #ccc; padding:10px 0; }
+  .p05 .price-row .p { font-size:34px; }
+  .p05 .tax { border-top:1px solid #ddd; width:100%; text-align:center; padding-top:18px; }
+
+  /* 06 */
+  .p06 { background: radial-gradient(circle at 50% 0%, #fff8f6, #fff 55%, #faf7f5); }
+  .p06 .brand-en { font-family:"Great Vibes",cursive; font-size:56px; color:#5a3d3d; letter-spacing:0.02em; }
+  .p06 .line { width:56px; height:1px; background:#d4b0b0; margin:14px 0; }
+  .p06 .price-row { border:1px solid #ebd4d4; padding:14px 20px; }
+  .p06 .system { color:#8a6060; }
+
+  /* 07 */
+  .p07 { background:#fcfcfd; border:20px solid #f0f1f3; }
+  .p07 .brand-en { font-family:"Josefin Sans",sans-serif; font-weight:300; font-size:34px; letter-spacing:0.16em; color:#2a2e36; margin-top:18px; }
+  .p07 .price-row { border-top:1px solid #e4e6ea; padding:18px 0; display:grid; grid-template-columns:1fr auto; }
+  .p07 .price-row:last-of-type { border-bottom:1px solid #e4e6ea; }
+  .p07 .system { color:#9aa0aa; font-family:"Josefin Sans",sans-serif; letter-spacing:0.4em; }
+
+  /* 08 */
+  .p08 { background:#fff; }
+  .p08 svg.leaf-frame { position:absolute; inset:36px; width:calc(100% - 72px); height:calc(100% - 72px); pointer-events:none; z-index:4; }
+  .p08 .brand-en { font-family:"Cormorant Garamond",serif; font-size:44px; font-weight:600; color:#2d4a32; }
+  .p08 .system { color:#8fa892; }
+
+  /* 09 */
+  .p09 { background: radial-gradient(ellipse at 20% 10%, rgba(180,210,190,0.22), transparent 45%), #fbfcfb; }
+  .p09 .brand-en { font-family:"Playfair Display",serif; font-style:italic; font-size:44px; color:#314838; margin-top:12px; }
+  .p09 .price-row { background:rgba(255,255,255,0.8); padding:14px 20px; box-shadow:0 1px 0 rgba(100,130,110,0.1); }
+
+  /* 10 */
+  .p10 { background:#fff; }
+
+  /* 11 */
+  .p11 { background:linear-gradient(180deg,#f4f5f7,#e9ebef); padding:40px; display:flex; }
+  .p11 .card { width:100%; height:100%; background:#fff; box-shadow:0 12px 40px rgba(40,50,70,0.08); display:flex; flex-direction:column; align-items:center; padding:28px 36px 24px; position:relative; }
+  .p11 .card::before { content:""; position:absolute; inset:12px; border:1px solid #e8e4dc; pointer-events:none; }
+  .p11 .card-photo { width:70%; height:300px; overflow:hidden; margin-bottom:14px; }
+  .p11 .brand-en { font-family:"Libre Baskerville",serif; font-size:36px; color:#2a3038; }
+  .p11 .system { color:#b0a090; }
+
+  /* 12 */
+  .p12 { background:#faf9f6; padding:48px 56px 40px; }
+  .p12 .arch { width:100%; height:100%; border:1.5px solid #c9b89a; border-radius:260px 260px 8px 8px; background:#fff; display:flex; flex-direction:column; align-items:center; padding:36px 40px 28px; overflow:hidden; }
+  .p12 .arch-photo { width:78%; height:280px; overflow:hidden; border-radius:180px 180px 4px 4px; margin-bottom:14px; }
+  .p12 .brand-en { font-family:"Playfair Display",serif; font-size:38px; color:#3a3228; text-align:center; }
+  .p12 .prices { width:92%; gap:10px; }
+  .p12 .price-row { font-size:19px; }
+  .p12 .price-row .p { font-size:26px; }
+  .p12 .tax { margin-bottom:12px; }
+
+  /* 13 */
+  .p13 { background:#fff; justify-content:flex-start; }
+  .p13 .brand-en { font-family:"Cinzel",serif; font-size:30px; letter-spacing:0.18em; color:#2a2a2a; }
+  .p13 .dots { display:flex; gap:10px; margin:14px 0; }
+  .p13 .dots span { width:5px; height:5px; border-radius:50%; background:#c4a574; }
+  .p13 .price-row { justify-content:center; gap:36px; }
+  .p13 .system { color:#c4a574; font-family:"Josefin Sans",sans-serif; }
+
+  /* 14 */
+  .p14 {
+    background: repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.012) 2px,rgba(0,0,0,0.012) 3px),
+      repeating-linear-gradient(90deg,transparent,transparent 2px,rgba(0,0,0,0.012) 2px,rgba(0,0,0,0.012) 3px), #f8f6f1;
+    padding: 48px;
+  }
+  .p14 .inner { width:100%; height:100%; border:1px solid #ddd5c4; background:rgba(255,255,255,0.6); display:flex; flex-direction:column; align-items:center; padding:20px 36px; }
+  .p14 .brand-en { font-family:"Libre Baskerville",serif; font-size:40px; color:#3a3428; }
+  .p14 .price-row { background:#fff; padding:12px 18px; border:1px solid #ebe4d6; }
+  .p14 .system { color:#a89068; }
+
+  /* 15 */
+  .p15 { background:#fff; text-align:center; padding-bottom:24px; }
+  .p15 .eyebrow { font-family:"Josefin Sans",sans-serif; font-size:11px; letter-spacing:0.5em; color:#b8a888; margin:4px 0 8px; }
+  .p15 .brand-en { font-family:"Cormorant Garamond",serif; font-size:48px; color:#243028; line-height:1.1; }
+  .p15 .rule { width:1px; height:36px; background:#c4a574; margin:12px 0; }
+  .p15 .system { display:none; }
+  .p15 .prices { margin-top:8px; }
+
+  /* 16 */
+  .p16 { background:#fff; }
+  .p16 .wash { position:absolute; width:260px; height:260px; border-radius:50%; filter:blur(40px); opacity:0.32; pointer-events:none; }
+  .p16 .w1 { top:-40px; left:-50px; background:#c5dcc8; }
+  .p16 .w2 { bottom:-40px; right:-40px; background:#d8e8d4; }
+  .p16 .photo-soft.roundish { position:relative; width:70%; height:340px; opacity:1; margin-top:56px; border-radius:8px; overflow:hidden; }
+  .p16 .photo-soft.roundish .photo-fade { height:30%; background:linear-gradient(180deg,transparent,#fff); }
+  .p16 .brand-en { font-family:"Playfair Display",serif; font-size:44px; color:#2e4534; margin-top:10px; }
+
+  /* 17 */
+  .p17 { display:grid; grid-template-rows:auto auto 1fr auto; align-items:stretch; }
+  .p17 .masthead { width:100%; padding:36px 48px 16px; border-bottom:3px solid #1a1a1a; text-align:left; }
+  .p17 .brand-en { font-family:"Playfair Display",serif; font-size:42px; font-weight:700; color:#111; }
+  .p17 .subhead { display:flex; justify-content:space-between; margin-top:10px; font-family:"Josefin Sans",sans-serif; font-size:12px; letter-spacing:0.28em; color:#444; border:none; padding:0; }
+  .p17 .content { align-items:stretch; padding:20px 48px; }
+  .p17 .price-row { padding:14px 0; border-bottom:1px solid #eee; }
+  .p17 .price-row .p { font-size:34px; }
+  .p17 .tax { text-align:center; width:100%; padding:16px 0 28px; margin:0; }
+
+  /* 18 */
+  .p18 { background:linear-gradient(160deg,#fff,#f9f6f0); padding:40px 48px; }
+  .p18 .top { text-align:center; margin-bottom:16px; }
+  .p18 .brand-en { font-family:"Cormorant Garamond",serif; font-size:44px; font-weight:600; color:#3a3226; }
+  .p18 .sheet { width:100%; flex:1; background:linear-gradient(180deg,#fbf7ef,#f5efe4); border:1px solid #e4d8c4; display:flex; flex-direction:column; align-items:center; padding:20px 28px; }
+  .p18 .sheet-photo { width:85%; height:260px; overflow:hidden; margin-bottom:14px; border:1px solid #e4d8c4; }
+  .p18 .price-row { background:#fff; padding:12px 18px; box-shadow:0 2px 8px rgba(80,60,30,0.04); }
+  .p18 .tax { margin-bottom:8px; }
+
+  /* 19 */
+  .p19 { background:#fefefe; align-items:stretch; padding:48px 56px; }
+  .p19 .top-line { height:2px; background:#1a1a1a; margin-bottom:20px; }
+  .p19 .brand-en { font-family:"Noto Serif CJK JP",serif; font-size:34px; font-weight:600; letter-spacing:0.1em; color:#1a1a1a; }
+  .p19 .gold-rule { height:1px; background:#c4a574; width:72px; margin:16px 0 18px; }
+  .p19 .jp-photo { width:100%; height:320px; overflow:hidden; margin-bottom:18px; }
+  .p19 .price-row { display:grid; grid-template-columns:1fr auto; padding:14px 0; border-bottom:1px solid #e8e8e8; }
+  .p19 .system { color:#888; font-family:"Josefin Sans",sans-serif; letter-spacing:0.4em; font-size:14px; }
+  .p19 .tax { margin:0; margin-top:auto; text-align:right; border-top:2px solid #1a1a1a; padding-top:16px; }
+
+  /* 20 */
+  .p20 { background:radial-gradient(ellipse at 50% 40%,#fff,#f7f5f0); overflow:hidden; }
+  .p20 .ribbon, .p20 .ribbon2 { position:absolute; top:-16px; width:380px; height:160px; border:12px solid transparent; border-radius:50% 50% 0 0; opacity:0.85; z-index:4; pointer-events:none; }
+  .p20 .ribbon { left:-36px; border-top-color:#2f4a36; border-left-color:#2f4a36; }
+  .p20 .ribbon2 { right:-36px; border-top-color:#2f4a36; border-right-color:#2f4a36; }
+  .p20 .ribbon-photo { margin-top:48px; width:calc(100% - 100px); height:40%; border:1px solid rgba(196,165,116,0.35); }
+  .p20 .brand-en { font-family:"Cormorant Garamond",serif; font-size:48px; font-weight:600; color:#2f4a36; margin-top:8px; }
+  .p20 .system { color:#1a1a1a; }
+  .p20 .tax { background:rgba(230,220,200,0.45); padding:8px 24px; color:#7a6a50; }
+
+</style>
+</head>
+<body>
+  <div class="gallery-note">
+    <h1>CLUB Rain Forest — A1縦 料金パネル サンプル 20案</h1>
+    <p>高級感・シンプル・白系ベース＋<strong>清楚な女性ポートレート</strong>を全案に配置。内容：店舗名・SYSTEM・お一人様60分・時間帯料金・税サ30%。</p>
+  </div>
+  <div class="panel-wrap">
+    <p class="label">01 — ピュアホワイト×ゴールド枠＋清楚ポートレート</p>
+    <section class="panel p01 layout-top_photo" id="panel-01" data-name="01_pure_white_gold_frame">
+
+      <div class="frame-outer"></div>
+      <div class="photo-top"><img src="assets/woman_01_ivory_portrait.png" alt=""><div class="photo-fade"></div></div>
+      <div class="content">
+        <div class="brand-en">CLUB Rain Forest</div>
+      <div class="brand-jp">レインフォレスト</div>
+        <div class="ornament"></div>
+        
+      <div class="system">SYSTEM</div>
+      <div class="unit">お一人様　60分</div>
+      <div class="prices">
+        <div class="price-row"><span class="t">20:00 〜 21:00</span><span class="p">¥4,000</span></div>
+        <div class="price-row"><span class="t">21:00 〜 22:00</span><span class="p">¥5,000</span></div>
+        <div class="price-row"><span class="t">22:00 〜 LAST</span><span class="p">¥6,000</span></div>
+      </div>
+      <div class="tax">税・サ 30%</div>
+      </div>
+    </section>
+  </div>
+  <div class="panel-wrap">
+    <p class="label">02 — ソフトアイボリー×円形ポートレート</p>
+    <section class="panel p02 layout-circle_photo" id="panel-02" data-name="02_soft_ivory_champagne">
+
+      <div class="corner c-tl"></div><div class="corner c-tr"></div>
+      <div class="corner c-bl"></div><div class="corner c-br"></div>
+      <div class="circle-photo"><img src="assets/woman_02_white_blouse.png" alt=""></div>
+      <div class="brand-en">CLUB Rain Forest</div>
+      <div class="brand-jp">レインフォレスト</div>
+      
+      <div class="system">SYSTEM</div>
+      <div class="unit">お一人様　60分</div>
+      <div class="prices">
+        <div class="price-row"><span class="t">20:00 〜 21:00</span><span class="p">¥4,000</span></div>
+        <div class="price-row"><span class="t">21:00 〜 22:00</span><span class="p">¥5,000</span></div>
+        <div class="price-row"><span class="t">22:00 〜 LAST</span><span class="p">¥6,000</span></div>
+      </div>
+      <div class="tax">税・サ 30%</div>
+    </section>
+  </div>
+  <div class="panel-wrap">
+    <p class="label">03 — ホワイト×ソフトセージ＋ポートレート</p>
+    <section class="panel p03 layout-band_photo" id="panel-03" data-name="03_white_soft_sage">
+
+      <div class="photo-band"><img src="assets/woman_03_sage_profile.png" alt=""><div class="photo-fade"></div></div>
+      <div class="brand-on-photo"><div class="brand-en">CLUB Rain Forest</div>
+      <div class="brand-jp">レインフォレスト</div></div>
+      <div class="body">
+        
+      <div class="system">SYSTEM</div>
+      <div class="unit">お一人様　60分</div>
+      <div class="prices">
+        <div class="price-row"><span class="t">20:00 〜 21:00</span><span class="p">¥4,000</span></div>
+        <div class="price-row"><span class="t">21:00 〜 22:00</span><span class="p">¥5,000</span></div>
+        <div class="price-row"><span class="t">22:00 〜 LAST</span><span class="p">¥6,000</span></div>
+      </div>
+      <div class="tax">税・サ 30%</div>
+      </div>
+    </section>
+  </div>
+  <div class="panel-wrap">
+    <p class="label">04 — パールホワイト×プラチナ＋ポートレート</p>
+    <section class="panel p04 layout-side_fade" id="panel-04" data-name="04_pearl_platinum">
+
+      <div class="side-rule sr-l"></div><div class="side-rule sr-r"></div>
+      <div class="photo-soft"><img src="assets/woman_04_cream_lace.png" alt=""><div class="photo-fade"></div></div>
+      <div class="content-over">
+        <div class="brand-en">CLUB Rain Forest</div>
+      <div class="brand-jp">レインフォレスト</div>
+        <div class="diamond"></div>
+        
+      <div class="system">SYSTEM</div>
+      <div class="unit">お一人様　60分</div>
+      <div class="prices">
+        <div class="price-row"><span class="t">20:00 〜 21:00</span><span class="p">¥4,000</span></div>
+        <div class="price-row"><span class="t">21:00 〜 22:00</span><span class="p">¥5,000</span></div>
+        <div class="price-row"><span class="t">22:00 〜 LAST</span><span class="p">¥6,000</span></div>
+      </div>
+      <div class="tax">税・サ 30%</div>
+      </div>
+    </section>
+  </div>
+  <div class="panel-wrap">
+    <p class="label">05 — エディトリアル大見出し＋ポートレート</p>
+    <section class="panel p05 layout-editorial" id="panel-05" data-name="05_editorial_large_brand">
+
+      <div class="photo-hero"><img src="assets/woman_05_blush_chiffon.png" alt=""><div class="photo-fade"></div>
+        <div class="hero-brand"><div class="brand-en">CLUB Rain Forest</div>
+      <div class="brand-jp">レインフォレスト</div></div>
+      </div>
+      <div class="mid">
+        
+      <div class="system">SYSTEM</div>
+      <div class="unit">お一人様　60分</div>
+      <div class="prices">
+        <div class="price-row"><span class="t">20:00 〜 21:00</span><span class="p">¥4,000</span></div>
+        <div class="price-row"><span class="t">21:00 〜 22:00</span><span class="p">¥5,000</span></div>
+        <div class="price-row"><span class="t">22:00 〜 LAST</span><span class="p">¥6,000</span></div>
+      </div>
+      <div class="tax">税・サ 30%</div>
+      </div>
+    </section>
+  </div>
+  <div class="panel-wrap">
+    <p class="label">06 — ソフトブラッシュ＋清楚ポートレート</p>
+    <section class="panel p06 layout-soft_card" id="panel-06" data-name="06_soft_blush_white">
+
+      <div class="photo-round"><img src="assets/woman_06_white_gown.png" alt=""></div>
+      <div class="brand-en">CLUB Rain Forest</div>
+      <div class="brand-jp">レインフォレスト</div>
+      <div class="line"></div>
+      
+      <div class="system">SYSTEM</div>
+      <div class="unit">お一人様　60分</div>
+      <div class="prices">
+        <div class="price-row"><span class="t">20:00 〜 21:00</span><span class="p">¥4,000</span></div>
+        <div class="price-row"><span class="t">21:00 〜 22:00</span><span class="p">¥5,000</span></div>
+        <div class="price-row"><span class="t">22:00 〜 LAST</span><span class="p">¥6,000</span></div>
+      </div>
+      <div class="tax">税・サ 30%</div>
+    </section>
+  </div>
+  <div class="panel-wrap">
+    <p class="label">07 — クールホワイト×プラチナ＋ポートレート</p>
+    <section class="panel p07 layout-split_top" id="panel-07" data-name="07_cool_white_platinum">
+
+      <div class="split-photo"><img src="assets/woman_01_ivory_portrait.png" alt=""></div>
+      <div class="split-content">
+        <div class="brand-en">CLUB Rain Forest</div>
+      <div class="brand-jp">レインフォレスト</div>
+        
+      <div class="system">SYSTEM</div>
+      <div class="unit">お一人様　60分</div>
+      <div class="prices">
+        <div class="price-row"><span class="t">20:00 〜 21:00</span><span class="p">¥4,000</span></div>
+        <div class="price-row"><span class="t">21:00 〜 22:00</span><span class="p">¥5,000</span></div>
+        <div class="price-row"><span class="t">22:00 〜 LAST</span><span class="p">¥6,000</span></div>
+      </div>
+      <div class="tax">税・サ 30%</div>
+      </div>
+    </section>
+  </div>
+  <div class="panel-wrap">
+    <p class="label">08 — ボタニカル枠＋清楚ポートレート</p>
+    <section class="panel p08 layout-botanical" id="panel-08" data-name="08_botanical_line">
+
+      <svg class="leaf-frame" viewBox="0 0 820 1193" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="20" y="20" width="780" height="1153" stroke="#8faf96" stroke-width="1.2" opacity="0.55"/>
+        <path d="M40 80 C60 40, 120 30, 140 70 C100 55, 70 70, 40 80Z" fill="#8faf96" opacity="0.35"/>
+        <path d="M780 80 C760 40, 700 30, 680 70 C720 55, 750 70, 780 80Z" fill="#8faf96" opacity="0.35"/>
+        <path d="M40 1113 C60 1153, 120 1163, 140 1123 C100 1138, 70 1123, 40 1113Z" fill="#8faf96" opacity="0.35"/>
+        <path d="M780 1113 C760 1153, 700 1163, 680 1123 C720 1138, 750 1123, 780 1113Z" fill="#8faf96" opacity="0.35"/>
+      </svg>
+      <div class="photo-inset"><img src="assets/woman_02_white_blouse.png" alt=""></div>
+      <div class="brand-en">CLUB Rain Forest</div>
+      <div class="brand-jp">レインフォレスト</div>
+      
+      <div class="system">SYSTEM</div>
+      <div class="unit">お一人様　60分</div>
+      <div class="prices">
+        <div class="price-row"><span class="t">20:00 〜 21:00</span><span class="p">¥4,000</span></div>
+        <div class="price-row"><span class="t">21:00 〜 22:00</span><span class="p">¥5,000</span></div>
+        <div class="price-row"><span class="t">22:00 〜 LAST</span><span class="p">¥6,000</span></div>
+      </div>
+      <div class="tax">税・サ 30%</div>
+    </section>
+  </div>
+  <div class="panel-wrap">
+    <p class="label">09 — ソフトミストグリーン＋ポートレート</p>
+    <section class="panel p09 layout-mist" id="panel-09" data-name="09_soft_mist_green">
+
+      <div class="photo-mist"><img src="assets/woman_03_sage_profile.png" alt=""><div class="photo-fade"></div></div>
+      <div class="mist-content">
+        <div class="brand-en">CLUB Rain Forest</div>
+      <div class="brand-jp">レインフォレスト</div>
+        
+      <div class="system">SYSTEM</div>
+      <div class="unit">お一人様　60分</div>
+      <div class="prices">
+        <div class="price-row"><span class="t">20:00 〜 21:00</span><span class="p">¥4,000</span></div>
+        <div class="price-row"><span class="t">21:00 〜 22:00</span><span class="p">¥5,000</span></div>
+        <div class="price-row"><span class="t">22:00 〜 LAST</span><span class="p">¥6,000</span></div>
+      </div>
+      <div class="tax">税・サ 30%</div>
+      </div>
+    </section>
+  </div>
+  <div class="panel-wrap">
+    <p class="label">10 — 二段組料金＋ポートレート</p>
+    <section class="panel p10 layout-dual" id="panel-10" data-name="10_two_column_price">
+      <div class="dual-photo"><img src="assets/woman_01_ivory_portrait.png" alt=""><div class="photo-fade"></div></div>
+      <div class="dual-body">
+        <div class="brand-en">CLUB Rain Forest</div>
+        <div class="brand-jp">レインフォレスト</div>
+        <div class="divider"></div>
+        <div class="system">SYSTEM</div>
+        <div class="unit">お一人様　60分</div>
+        <div class="price-block">
+          <div class="prices">
+            <div class="price-row"><span class="t">20:00 〜 21:00</span><span class="p">¥4,000</span></div>
+            <div class="price-row"><span class="t">21:00 〜 22:00</span><span class="p">¥5,000</span></div>
+            <div class="price-row"><span class="t">22:00 〜 LAST</span><span class="p">¥6,000</span></div>
+          </div>
+          <div class="tax">税・サ 30%</div>
+        </div>
+      </div>
+      <div class="bottom-banner"><img src="assets/club_interior_banner.jpg" alt="Club Rain Forest"></div>
+    </section>
+  </div>
+  <div class="panel-wrap">
+    <p class="label">11 — パールカード＋清楚ポートレート</p>
+    <section class="panel p11 layout-float_card" id="panel-11" data-name="11_pearl_card">
+
+      <div class="card">
+        <div class="card-photo"><img src="assets/woman_05_blush_chiffon.png" alt=""></div>
+        <div class="brand-en">CLUB Rain Forest</div>
+      <div class="brand-jp">レインフォレスト</div>
+        
+      <div class="system">SYSTEM</div>
+      <div class="unit">お一人様　60分</div>
+      <div class="prices">
+        <div class="price-row"><span class="t">20:00 〜 21:00</span><span class="p">¥4,000</span></div>
+        <div class="price-row"><span class="t">21:00 〜 22:00</span><span class="p">¥5,000</span></div>
+        <div class="price-row"><span class="t">22:00 〜 LAST</span><span class="p">¥6,000</span></div>
+      </div>
+      <div class="tax">税・サ 30%</div>
+      </div>
+    </section>
+  </div>
+  <div class="panel-wrap">
+    <p class="label">12 — アーチ窓＋清楚ポートレート</p>
+    <section class="panel p12 layout-arch" id="panel-12" data-name="12_arch_window">
+
+      <div class="arch">
+        <div class="arch-photo"><img src="assets/woman_06_white_gown.png" alt=""></div>
+        <div class="brand-en">CLUB Rain Forest</div>
+      <div class="brand-jp">レインフォレスト</div>
+        
+      <div class="system">SYSTEM</div>
+      <div class="unit">お一人様　60分</div>
+      <div class="prices">
+        <div class="price-row"><span class="t">20:00 〜 21:00</span><span class="p">¥4,000</span></div>
+        <div class="price-row"><span class="t">21:00 〜 22:00</span><span class="p">¥5,000</span></div>
+        <div class="price-row"><span class="t">22:00 〜 LAST</span><span class="p">¥6,000</span></div>
+      </div>
+      <div class="tax">税・サ 30%</div>
+      </div>
+    </section>
+  </div>
+  <div class="panel-wrap">
+    <p class="label">13 — ゴールドドット×円形ポートレート</p>
+    <section class="panel p13 layout-minimal_circle" id="panel-13" data-name="13_gold_dot_minimal">
+
+      <div class="circle-photo sm"><img src="assets/woman_01_ivory_portrait.png" alt=""></div>
+      <div class="brand-en">CLUB Rain Forest</div>
+      <div class="brand-jp">レインフォレスト</div>
+      <div class="dots"><span></span><span></span><span></span></div>
+      
+      <div class="system">SYSTEM</div>
+      <div class="unit">お一人様　60分</div>
+      <div class="prices">
+        <div class="price-row"><span class="t">20:00 〜 21:00</span><span class="p">¥4,000</span></div>
+        <div class="price-row"><span class="t">21:00 〜 22:00</span><span class="p">¥5,000</span></div>
+        <div class="price-row"><span class="t">22:00 〜 LAST</span><span class="p">¥6,000</span></div>
+      </div>
+      <div class="tax">税・サ 30%</div>
+    </section>
+  </div>
+  <div class="panel-wrap">
+    <p class="label">14 — ソフトリネン＋ポートレート</p>
+    <section class="panel p14 layout-linen" id="panel-14" data-name="14_soft_linen">
+
+      <div class="inner">
+        <div class="photo-inset tall"><img src="assets/woman_02_white_blouse.png" alt=""></div>
+        <div class="brand-en">CLUB Rain Forest</div>
+      <div class="brand-jp">レインフォレスト</div>
+        
+      <div class="system">SYSTEM</div>
+      <div class="unit">お一人様　60分</div>
+      <div class="prices">
+        <div class="price-row"><span class="t">20:00 〜 21:00</span><span class="p">¥4,000</span></div>
+        <div class="price-row"><span class="t">21:00 〜 22:00</span><span class="p">¥5,000</span></div>
+        <div class="price-row"><span class="t">22:00 〜 LAST</span><span class="p">¥6,000</span></div>
+      </div>
+      <div class="tax">税・サ 30%</div>
+      </div>
+    </section>
+  </div>
+  <div class="panel-wrap">
+    <p class="label">15 — センタードセリフ＋ポートレート</p>
+    <section class="panel p15 layout-center" id="panel-15" data-name="15_centered_serif">
+
+      <div class="circle-photo"><img src="assets/woman_03_sage_profile.png" alt=""></div>
+      <div class="eyebrow">SYSTEM MENU</div>
+      <div class="brand-en">CLUB Rain Forest</div>
+      <div class="brand-jp">レインフォレスト</div>
+      <div class="rule"></div>
+      <div class="unit">お一人様　60分</div>
+      <div class="prices">
+        <div class="price-row"><span class="t">20:00 〜 21:00</span><span class="p">¥4,000</span></div>
+        <div class="price-row"><span class="t">21:00 〜 22:00</span><span class="p">¥5,000</span></div>
+        <div class="price-row"><span class="t">22:00 〜 LAST</span><span class="p">¥6,000</span></div>
+      </div>
+      <div class="tax">税・サ 30%</div>
+    </section>
+  </div>
+  <div class="panel-wrap">
+    <p class="label">16 — 水彩リーフ＋ポートレート</p>
+    <section class="panel p16 layout-wash" id="panel-16" data-name="16_watercolor_leaf">
+
+      <div class="wash w1"></div><div class="wash w2"></div>
+      <div class="photo-soft roundish"><img src="assets/woman_04_cream_lace.png" alt=""><div class="photo-fade"></div></div>
+      <div class="wash-content">
+        <div class="brand-en">CLUB Rain Forest</div>
+      <div class="brand-jp">レインフォレスト</div>
+        
+      <div class="system">SYSTEM</div>
+      <div class="unit">お一人様　60分</div>
+      <div class="prices">
+        <div class="price-row"><span class="t">20:00 〜 21:00</span><span class="p">¥4,000</span></div>
+        <div class="price-row"><span class="t">21:00 〜 22:00</span><span class="p">¥5,000</span></div>
+        <div class="price-row"><span class="t">22:00 〜 LAST</span><span class="p">¥6,000</span></div>
+      </div>
+      <div class="tax">税・サ 30%</div>
+      </div>
+    </section>
+  </div>
+  <div class="panel-wrap">
+    <p class="label">17 — 雑誌風ホワイト＋ポートレート</p>
+    <section class="panel p17 layout-magazine" id="panel-17" data-name="17_magazine_white">
+
+      <div class="masthead"><div class="brand-en">CLUB Rain Forest</div>
+      <div class="brand-jp">レインフォレスト</div>
+        <div class="subhead"><span>SYSTEM</span><span>PRICE LIST</span></div>
+      </div>
+      <div class="mag-photo"><img src="assets/woman_05_blush_chiffon.png" alt=""></div>
+      <div class="content">
+        <div class="unit">お一人様　60分</div>
+        
+        <div class="price-row"><span class="t">20:00 〜 21:00</span><span class="p">¥4,000</span></div>
+        <div class="price-row"><span class="t">21:00 〜 22:00</span><span class="p">¥5,000</span></div>
+        <div class="price-row"><span class="t">22:00 〜 LAST</span><span class="p">¥6,000</span></div>
+      </div>
+      <div class="tax">税・サ 30%</div>
+    </section>
+  </div>
+  <div class="panel-wrap">
+    <p class="label">18 — シャンパーニュシート＋ポートレート</p>
+    <section class="panel p18 layout-sheet" id="panel-18" data-name="18_champagne_sheet">
+
+      <div class="top"><div class="brand-en">CLUB Rain Forest</div>
+      <div class="brand-jp">レインフォレスト</div></div>
+      <div class="sheet">
+        <div class="sheet-photo"><img src="assets/woman_06_white_gown.png" alt=""></div>
+        <div class="system">SYSTEM</div>
+        <div class="unit">お一人様　60分</div>
+        <div class="prices">
+        <div class="price-row"><span class="t">20:00 〜 21:00</span><span class="p">¥4,000</span></div>
+        <div class="price-row"><span class="t">21:00 〜 22:00</span><span class="p">¥5,000</span></div>
+        <div class="price-row"><span class="t">22:00 〜 LAST</span><span class="p">¥6,000</span></div>
+        </div>
+        <div class="tax">税・サ 30%</div>
+      </div>
+    </section>
+  </div>
+  <div class="panel-wrap">
+    <p class="label">19 — 和モダン＋清楚ポートレート</p>
+    <section class="panel p19 layout-jp" id="panel-19" data-name="19_jp_modern_white">
+
+      <div class="top-line"></div>
+      <div class="brand-en">CLUB Rain Forest</div>
+      <div class="brand-jp">レインフォレスト</div>
+      <div class="gold-rule"></div>
+      <div class="jp-photo"><img src="assets/woman_01_ivory_portrait.png" alt=""></div>
+      <div class="system">SYSTEM</div>
+      <div class="unit">お一人様　60分</div>
+      <div class="prices">
+        <div class="price-row"><span class="t">20:00 〜 21:00</span><span class="p">¥4,000</span></div>
+        <div class="price-row"><span class="t">21:00 〜 22:00</span><span class="p">¥5,000</span></div>
+        <div class="price-row"><span class="t">22:00 〜 LAST</span><span class="p">¥6,000</span></div>
+      </div>
+      <div class="tax">税・サ 30%</div>
+    </section>
+  </div>
+  <div class="panel-wrap">
+    <p class="label">20 — リボン曲線＋清楚ポートレート</p>
+    <section class="panel p20 layout-ribbon" id="panel-20" data-name="20_ribbon_homage">
+
+      <div class="ribbon"></div><div class="ribbon2"></div>
+      <div class="photo-top ribbon-photo"><img src="assets/woman_02_white_blouse.png" alt=""><div class="photo-fade"></div></div>
+      <div class="content">
+        <div class="brand-en">CLUB Rain Forest</div>
+      <div class="brand-jp">レインフォレスト</div>
+        
+      <div class="system">SYSTEM</div>
+      <div class="unit">お一人様　60分</div>
+      <div class="prices">
+        <div class="price-row"><span class="t">20:00 〜 21:00</span><span class="p">¥4,000</span></div>
+        <div class="price-row"><span class="t">21:00 〜 22:00</span><span class="p">¥5,000</span></div>
+        <div class="price-row"><span class="t">22:00 〜 LAST</span><span class="p">¥6,000</span></div>
+      </div>
+      <div class="tax">税・サ 30%</div>
+      </div>
+    </section>
+  </div>
+
+</body>
+</html>
