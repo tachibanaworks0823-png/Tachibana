@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ハロウィン フライヤー 配色サンプル</title>
+  <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root { --bg:#fff8f2; --ink:#4a3428; --accent:#c45a2a; }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body {
+      font-family:"Shippori Mincho",serif;
+      background: radial-gradient(ellipse 70% 40% at 50% 0%, #ffe8d6, transparent 55%), var(--bg);
+      color:var(--ink);
+      padding:2rem 1.25rem 3rem;
+    }
+    header { max-width:1100px; margin:0 auto 1.75rem; text-align:center; }
+    h1 { font-size:clamp(1.25rem,4vw,1.85rem); letter-spacing:.08em; color:var(--accent); }
+    p { margin-top:.75rem; line-height:1.7; letter-spacing:.04em; }
+    nav { margin-top:1rem; font-size:.9rem; }
+    nav a { color:var(--accent); margin:0 .4rem; }
+    .grid {
+      max-width:1100px; margin:0 auto;
+      display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:1.25rem;
+    }
+    figure {
+      background:#fff; border-radius:12px; overflow:hidden;
+      box-shadow:0 8px 24px rgba(74,52,40,.08);
+    }
+    img { display:block; width:100%; aspect-ratio:3/4; object-fit:cover; }
+    figcaption { padding:.55rem .6rem .7rem; text-align:center; font-size:.78rem; letter-spacing:.06em; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>COLOR VARIATIONS — 15 SAMPLES</h1>
+    <p>完成版レイアウトのまま配色だけ変えたサンプルです。<br />気に入った色を番号で指定してください。</p>
+    <nav>
+      <a href="gallery-cute.html">かわいい系</a> ·
+      <a href="gallery.html">ダーク系</a>
+    </nav>
+  </header>
+  <div class="grid" id="grid"></div>
+  <script>
+    const items = [
+      ["01-pink", "ピンク"],
+      ["02-mint", "ミント"],
+      ["03-skyblue", "スカイブルー"],
+      ["04-lavender", "ラベンダー"],
+      ["05-lemon", "レモン"],
+      ["06-cherry", "チェリー"],
+      ["07-chocolate", "チョコレート"],
+      ["08-coral", "コーラル"],
+      ["09-blackgold", "ブラック×ゴールド"],
+      ["10-grape", "グレープ"],
+      ["11-aqua", "アクア"],
+      ["12-matcha", "抹茶"],
+      ["13-rosegold", "ローズゴールド"],
+      ["14-rainbow", "レインボー"],
+      ["15-silver", "シルバー"],
+    ];
+    const grid = document.getElementById("grid");
+    for (const [id, label] of items) {
+      const fig = document.createElement("figure");
+      fig.innerHTML = `
+        <a href="samples-color/halloween-color-${id}.jpg" target="_blank" rel="noopener">
+          <img src="samples-color/halloween-color-${id}.jpg" alt="${label}" loading="lazy" />
+        </a>
+        <figcaption>${id.split("-")[0]}. ${label}</figcaption>`;
+      grid.appendChild(fig);
+    }
+  </script>
+</body>
+</html>

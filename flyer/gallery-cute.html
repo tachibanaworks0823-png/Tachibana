@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>かわいいハロウィン コスプレ フライヤー サンプル20</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #fff6ef;
+      --panel: #ffffff;
+      --accent: #e07a3a;
+      --ink: #5a3a2a;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Shippori Mincho", serif;
+      background:
+        radial-gradient(ellipse 70% 40% at 50% 0%, #ffe0c8, transparent 55%),
+        var(--bg);
+      color: var(--ink);
+      padding: 2rem 1.25rem 3rem;
+    }
+    header {
+      max-width: 1100px;
+      margin: 0 auto 1.75rem;
+      text-align: center;
+    }
+    header h1 {
+      font-size: clamp(1.3rem, 4vw, 1.9rem);
+      letter-spacing: 0.1em;
+      color: var(--accent);
+    }
+    header p {
+      margin-top: 0.75rem;
+      letter-spacing: 0.06em;
+      opacity: 0.9;
+      line-height: 1.7;
+    }
+    nav {
+      margin-top: 1rem;
+      font-size: 0.9rem;
+    }
+    nav a { color: var(--accent); }
+    .grid {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1.25rem;
+    }
+    figure {
+      background: var(--panel);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 8px 24px rgba(90, 58, 42, 0.08);
+    }
+    figure a { display: block; }
+    figure img {
+      display: block;
+      width: 100%;
+      height: auto;
+      aspect-ratio: 3 / 4;
+      object-fit: cover;
+    }
+    figcaption {
+      padding: 0.55rem 0.6rem 0.7rem;
+      font-size: 0.8rem;
+      letter-spacing: 0.12em;
+      text-align: center;
+      color: var(--accent);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>CUTE HALLOWEEN COSPLAY — 20 SAMPLES</h1>
+    <p>
+      かわいいトーン<br />
+      イベント：コスプレ ／ 文言：仮装で盛り上がる特別な2日間<br />
+      日程：10/30・10/31
+    </p>
+    <nav><a href="gallery.html">← ダーク系サンプル一覧</a></nav>
+  </header>
+  <div class="grid" id="grid"></div>
+  <script>
+    const grid = document.getElementById("grid");
+    for (let i = 1; i <= 20; i++) {
+      const n = String(i).padStart(2, "0");
+      const fig = document.createElement("figure");
+      fig.innerHTML = `
+        <a href="samples-cute/halloween-cute-${n}.jpg" target="_blank" rel="noopener">
+          <img src="samples-cute/halloween-cute-${n}.jpg" alt="Cute Halloween flyer sample ${n}" loading="lazy" />
+        </a>
+        <figcaption>CUTE ${n}</figcaption>
+      `;
+      grid.appendChild(fig);
+    }
+  </script>
+</body>
+</html>
