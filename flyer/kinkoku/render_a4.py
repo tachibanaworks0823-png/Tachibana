@@ -19,48 +19,56 @@ A4_H = 3508
 CHROME = "/usr/local/bin/google-chrome"
 
 
-def run(cmd: list[str]) -> None:
-    print("+", " ".join(cmd))
-    subprocess.run(cmd, check=True)
-
-
 def main() -> int:
     if not HTML.exists():
         print(f"Missing {HTML}", file=sys.stderr)
         return 1
 
     url = HTML.as_uri()
-    # Allow Google Fonts to load
-    time.sleep(1.5)
-
-    user_data = ROOT / ".chrome-user"
+    user_data = ROOT / ".chrome-userdata"
     user_data.mkdir(exist_ok=True)
 
-    # Virtual time budget helps fonts settle before capture
-    run(
-        [
-            CHROME,
-            "--headless=new",
-            "--disable-gpu",
-            "--no-sandbox",
-            "--disable-dev-shm-usage",
-            "--allow-file-access-from-files",
-            "--hide-scrollbars",
-            f"--user-data-dir={user_data}",
-            "--virtual-time-budget=8000",
-            f"--window-size={A4_W},{A4_H}",
-            f"--screenshot={PNG}",
-            "--force-device-scale-factor=1",
-            "--timeout=30000",
-            url,
-        ],
-    )
+    # Allow Google Fonts a moment; virtual-time-budget also advances timers
+    time.sleep(0.5)
+
+    cmd = [
+        CHROME,
+        "--headless=new",
+        "--disable-gpu",
+        "--no-sandbox",
+        "--disable-dev-shm-usage",
+        "--allow-file-access-from-files",
+        "--hide-scrollbars",
+        f"--user-data-dir={user_data}",
+        "--virtual-time-budget=5000",
+        f"--window-size={A4_W},{A4_H}",
+        f"--screenshot={PNG}",
+        "--force-device-scale-factor=1",
+        url,
+    ]
+    print("+", " ".join(cmd))
+    # Chrome sometimes hangs after screenshot; kill after success window
+    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    deadline = time.time() + 45
+    while time.time() < deadline:
+        if PNG.exists() and PNG.stat().st_size > 50_000:
+            time.sleep(1.0)  # let write finish
+            proc.kill()
+            break
+        if proc.poll() is not None:
+            break
+        time.sleep(0.3)
+    else:
+        proc.kill()
+
+    proc.wait(timeout=10)
 
     if not PNG.exists():
         print("PNG was not created", file=sys.stderr)
+        err = (proc.stderr.read() if proc.stderr else b"").decode("utf-8", "replace")
+        print(err[-2000:], file=sys.stderr)
         return 1
 
-    # Normalize exact A4 pixel size if Chrome viewport differs
     try:
         from PIL import Image
 
