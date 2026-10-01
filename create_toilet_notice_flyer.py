@@ -169,13 +169,13 @@ def render() -> Image.Image:
     y = int(124 / 25.4 * DPI)
     draw_centered(draw, "当店のトイレを汚損または破損された場合、", cx, y, f_body, CREAM)
     y = int(136 / 25.4 * DPI)
-    draw_centered(draw, "実費をご負担いただきます。", cx, y, f_body, CREAM)
+    draw_centered(draw, "下記のとおり費用をご請求いたします。", cx, y, f_body, CREAM)
 
-    # 請求対象ボックス
-    box_w = int(150 / 25.4 * DPI)
-    box_h = int(68 / 25.4 * DPI)
+    # 請求内容ボックス
+    box_w = int(158 / 25.4 * DPI)
+    box_h = int(70 / 25.4 * DPI)
     box_x0 = cx - box_w // 2
-    box_y0 = int(154 / 25.4 * DPI)
+    box_y0 = int(148 / 25.4 * DPI)
     box_x1 = box_x0 + box_w
     box_y1 = box_y0 + box_h
 
@@ -193,7 +193,7 @@ def render() -> Image.Image:
     draw = ImageDraw.Draw(img)
 
     # 見出し
-    hy = box_y0 + int(14 / 25.4 * DPI)
+    hy = box_y0 + int(13 / 25.4 * DPI)
     sq = int(3.8 / 25.4 * DPI)
     draw.rectangle(
         [box_x0 + int(14 / 25.4 * DPI), hy - sq // 2, box_x0 + int(14 / 25.4 * DPI) + sq, hy + sq // 2],
@@ -201,40 +201,58 @@ def render() -> Image.Image:
     )
     draw.text(
         (box_x0 + int(21 / 25.4 * DPI), hy),
-        "請求対象",
+        "請求内容",
         font=f_box_h,
         fill=GOLD,
         anchor="lm",
     )
 
-    items = [
-        "トイレ内の汚損に対する清掃費",
-        "設備・備品の破損に対する修理費",
-        "原状回復に要する実費",
+    # 左：項目 / 右：金額（料金表風）
+    f_fee = font("Bold", 42)
+    rows = [
+        ("1.", "汚損による清掃費", "金50,000円"),
+        ("2.", "破損による修繕費", "実費（全額）"),
     ]
-    iy = box_y0 + int(28 / 25.4 * DPI)
-    for i, item in enumerate(items, start=1):
+    iy = box_y0 + int(26 / 25.4 * DPI)
+    label_x = box_x0 + int(16 / 25.4 * DPI)
+    fee_x = box_x1 - int(14 / 25.4 * DPI)
+    for num, label, fee in rows:
+        draw.text((label_x, iy), num, font=f_num, fill=RED, anchor="lt")
         draw.text(
-            (box_x0 + int(18 / 25.4 * DPI), iy),
-            f"{i}.",
-            font=f_num,
-            fill=RED,
-            anchor="lt",
-        )
-        draw.text(
-            (box_x0 + int(30 / 25.4 * DPI), iy),
-            item,
+            (label_x + int(12 / 25.4 * DPI), iy),
+            label,
             font=f_item,
             fill=CREAM,
             anchor="lt",
         )
-        iy += int(13 / 25.4 * DPI)
+        draw.text((fee_x, iy), fee, font=f_fee, fill=GOLD, anchor="rt")
+        # 点線ガイド
+        guide_y = iy + int(9 / 25.4 * DPI)
+        gx0 = label_x + int(12 / 25.4 * DPI) + text_size(draw, label, f_item)[0] + int(4 / 25.4 * DPI)
+        gx1 = fee_x - text_size(draw, fee, f_fee)[0] - int(4 / 25.4 * DPI)
+        if gx1 > gx0 + 8:
+            x = gx0
+            while x < gx1:
+                draw.ellipse([x, guide_y, x + 3, guide_y + 3], fill=GOLD_DIM)
+                x += 10
+        iy += int(16 / 25.4 * DPI)
+
+    # 注記（ボックス内）
+    draw_centered(
+        draw,
+        "※修繕費は、修理・交換に要した費用をそのままご請求します。",
+        cx,
+        box_y1 - int(9 / 25.4 * DPI),
+        f_note,
+        MUTED,
+    )
 
     # 強調帯
-    bar_w = int(160 / 25.4 * DPI)
-    bar_h = int(16 / 25.4 * DPI)
+    f_bar_sm = font("Bold", 38)
+    bar_w = int(168 / 25.4 * DPI)
+    bar_h = int(15 / 25.4 * DPI)
     bar_x0 = cx - bar_w // 2
-    bar_y0 = box_y1 + int(16 / 25.4 * DPI)
+    bar_y0 = box_y1 + int(12 / 25.4 * DPI)
     accent_w = int(4 / 25.4 * DPI)
     draw.rectangle([bar_x0, bar_y0, bar_x0 + accent_w, bar_y0 + bar_h], fill=RED)
     draw.rectangle([bar_x0 + accent_w, bar_y0, bar_x0 + bar_w, bar_y0 + bar_h], fill=RED_DEEP)
@@ -242,16 +260,16 @@ def render() -> Image.Image:
     draw.line([(bar_x0, bar_y0 + bar_h), (bar_x0 + bar_w, bar_y0 + bar_h)], fill=GOLD, width=2)
     draw_centered(
         draw,
-        "清掃費・修理費を請求いたします",
+        "清掃費5万円／修繕費は実費を請求いたします",
         cx + accent_w // 2,
         bar_y0 + bar_h // 2,
-        f_bar,
+        f_bar_sm,
         WHITE,
         anchor="mm",
     )
 
     # 補足
-    note_y = bar_y0 + bar_h + int(16 / 25.4 * DPI)
+    note_y = bar_y0 + bar_h + int(12 / 25.4 * DPI)
     draw_centered(
         draw,
         "悪質な場合は、警察へ通報のうえ然るべき措置を講じます。",
@@ -262,11 +280,11 @@ def render() -> Image.Image:
     )
 
     # 結び
-    close_top = int(250 / 25.4 * DPI)
+    close_top = note_y + int(16 / 25.4 * DPI)
     half2 = int(48 / 25.4 * DPI)
     draw.line([(cx - half2, close_top), (cx + half2, close_top)], fill=GOLD_DIM, width=1)
-    draw_centered(draw, "何卒ご理解とご協力のほど、", cx, close_top + int(14 / 25.4 * DPI), f_close, WHITE)
-    draw_centered(draw, "お願い申し上げます。", cx, close_top + int(26 / 25.4 * DPI), f_close, WHITE)
+    draw_centered(draw, "何卒ご理解とご協力のほど、", cx, close_top + int(12 / 25.4 * DPI), f_close, WHITE)
+    draw_centered(draw, "お願い申し上げます。", cx, close_top + int(23 / 25.4 * DPI), f_close, WHITE)
 
     return img
 
