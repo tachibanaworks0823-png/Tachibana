@@ -113,25 +113,27 @@ def render() -> Image.Image:
     f_close = font("Medium", 48)
 
     # ページ中央寄りに配置（削除後の余白を活かす）
-    y = int(52 / 25.4 * DPI)
+    y = int(42 / 25.4 * DPI)
     draw_centered(draw, "トイレのご利用について", cx, y, f_title, INK)
 
-    y = int(72 / 25.4 * DPI)
+    y = int(60 / 25.4 * DPI)
     half = int(36 / 25.4 * DPI)
     draw.line([(cx - half, y), (cx + half, y)], fill=LINE, width=3)
     s = int(2.2 / 25.4 * DPI)
     draw.polygon([(cx, y - s), (cx + s, y), (cx, y + s), (cx - s, y)], fill=ACCENT)
 
-    y = int(94 / 25.4 * DPI)
+    y = int(80 / 25.4 * DPI)
+    draw_centered(draw, "いつも綺麗にご利用いただき、ありがとうございます。", cx, y, f_body, INK_SOFT)
+    y = int(100 / 25.4 * DPI)
     draw_centered(draw, "当店のトイレを汚損または破損された場合、", cx, y, f_body, INK_SOFT)
-    y = int(112 / 25.4 * DPI)
+    y = int(116 / 25.4 * DPI)
     draw_centered(draw, "下記のとおり費用をご請求いたします。", cx, y, f_body, INK_SOFT)
 
     # 請求内容ボックス
     box_w = int(172 / 25.4 * DPI)
     box_h = int(92 / 25.4 * DPI)
     box_x0 = cx - box_w // 2
-    box_y0 = int(132 / 25.4 * DPI)
+    box_y0 = int(136 / 25.4 * DPI)
     box_x1 = box_x0 + box_w
     box_y1 = box_y0 + box_h
 
