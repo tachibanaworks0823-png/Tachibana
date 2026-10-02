@@ -167,7 +167,8 @@ def render() -> Image.Image:
     ]
     iy = box_y0 + int(32 / 25.4 * DPI)
     label_x = box_x0 + int(14 / 25.4 * DPI)
-    fee_x = box_x1 - int(12 / 25.4 * DPI)
+    # 金額は左揃えで縦位置を揃える
+    fee_x = box_x0 + int(98 / 25.4 * DPI)
     for num, label, fee in rows:
         draw.text((label_x, iy), num, font=f_num, fill=ACCENT, anchor="lt")
         draw.text(
@@ -177,10 +178,10 @@ def render() -> Image.Image:
             fill=INK,
             anchor="lt",
         )
-        draw.text((fee_x, iy), fee, font=f_fee, fill=ACCENT, anchor="rt")
+        draw.text((fee_x, iy), fee, font=f_fee, fill=ACCENT, anchor="lt")
         guide_y = iy + int(11 / 25.4 * DPI)
         gx0 = label_x + int(14 / 25.4 * DPI) + text_size(draw, label, f_item)[0] + int(4 / 25.4 * DPI)
-        gx1 = fee_x - text_size(draw, fee, f_fee)[0] - int(4 / 25.4 * DPI)
+        gx1 = fee_x - int(4 / 25.4 * DPI)
         if gx1 > gx0 + 8:
             x = gx0
             while x < gx1:
