@@ -103,39 +103,35 @@ def render() -> Image.Image:
     draw_frame(draw)
     cx = W // 2
 
-    f_en = font_sans(32)
-    f_title = font("Black", 72)
-    f_body = font("Regular", 48)
-    f_box_h = font("Medium", 46)
-    f_item = font("Regular", 48)
-    f_num = font("Bold", 48)
-    f_fee = font("Bold", 50)
-    f_note = font("Regular", 36)
-    f_close = font("Medium", 46)
-    f_bar = font("Bold", 42)
+    f_title = font("Black", 76)
+    f_body = font("Regular", 50)
+    f_box_h = font("Medium", 48)
+    f_item = font("Regular", 50)
+    f_num = font("Bold", 50)
+    f_fee = font("Bold", 52)
+    f_note = font("Regular", 38)
+    f_close = font("Medium", 48)
 
-    y = int(26 / 25.4 * DPI)
-    draw_spaced(draw, "OFFICIAL NOTICE", cx, y, f_en, MUTED, tracking=12)
-
-    y = int(44 / 25.4 * DPI)
+    # ページ中央寄りに配置（削除後の余白を活かす）
+    y = int(52 / 25.4 * DPI)
     draw_centered(draw, "トイレのご利用について", cx, y, f_title, INK)
 
-    y = int(62 / 25.4 * DPI)
+    y = int(72 / 25.4 * DPI)
     half = int(36 / 25.4 * DPI)
     draw.line([(cx - half, y), (cx + half, y)], fill=LINE, width=3)
     s = int(2.2 / 25.4 * DPI)
     draw.polygon([(cx, y - s), (cx + s, y), (cx, y + s), (cx - s, y)], fill=ACCENT)
 
-    y = int(78 / 25.4 * DPI)
-    draw_centered(draw, "当店のトイレを汚損または破損された場合、", cx, y, f_body, INK_SOFT)
     y = int(94 / 25.4 * DPI)
+    draw_centered(draw, "当店のトイレを汚損または破損された場合、", cx, y, f_body, INK_SOFT)
+    y = int(112 / 25.4 * DPI)
     draw_centered(draw, "下記のとおり費用をご請求いたします。", cx, y, f_body, INK_SOFT)
 
     # 請求内容ボックス
     box_w = int(172 / 25.4 * DPI)
-    box_h = int(86 / 25.4 * DPI)
+    box_h = int(92 / 25.4 * DPI)
     box_x0 = cx - box_w // 2
-    box_y0 = int(110 / 25.4 * DPI)
+    box_y0 = int(132 / 25.4 * DPI)
     box_x1 = box_x0 + box_w
     box_y1 = box_y0 + box_h
 
@@ -147,7 +143,7 @@ def render() -> Image.Image:
         width=2,
     )
 
-    hy = box_y0 + int(16 / 25.4 * DPI)
+    hy = box_y0 + int(18 / 25.4 * DPI)
     sq = int(4.2 / 25.4 * DPI)
     draw.rectangle(
         [box_x0 + int(14 / 25.4 * DPI), hy - sq // 2, box_x0 + int(14 / 25.4 * DPI) + sq, hy + sq // 2],
@@ -165,7 +161,7 @@ def render() -> Image.Image:
         ("1.", "汚損による清掃費", "金50,000円"),
         ("2.", "破損による修繕費", "実費（全額）"),
     ]
-    iy = box_y0 + int(32 / 25.4 * DPI)
+    iy = box_y0 + int(36 / 25.4 * DPI)
     label_x = box_x0 + int(14 / 25.4 * DPI)
     # 金額は左揃えで縦位置を揃える
     fee_x = box_x0 + int(98 / 25.4 * DPI)
@@ -187,53 +183,24 @@ def render() -> Image.Image:
             while x < gx1:
                 draw.ellipse([x, guide_y, x + 3, guide_y + 3], fill=BOX_LINE)
                 x += 10
-        iy += int(20 / 25.4 * DPI)
+        iy += int(22 / 25.4 * DPI)
 
     draw_centered(
         draw,
         "※修繕費は、修理・交換に要した費用をそのままご請求します。",
         cx,
-        box_y1 - int(11 / 25.4 * DPI),
+        box_y1 - int(12 / 25.4 * DPI),
         f_note,
         MUTED,
     )
 
-    # 強調帯
-    bar_w = int(178 / 25.4 * DPI)
-    bar_h = int(20 / 25.4 * DPI)
-    bar_x0 = cx - bar_w // 2
-    bar_y0 = box_y1 + int(12 / 25.4 * DPI)
-    accent_w = int(5 / 25.4 * DPI)
-    draw.rectangle([bar_x0, bar_y0, bar_x0 + accent_w, bar_y0 + bar_h], fill=ACCENT)
-    draw.rectangle([bar_x0 + accent_w, bar_y0, bar_x0 + bar_w, bar_y0 + bar_h], fill=ACCENT_DEEP)
-    draw_centered(
-        draw,
-        "清掃費5万円／修繕費は実費を請求いたします",
-        cx + accent_w // 2,
-        bar_y0 + bar_h // 2,
-        f_bar,
-        WHITE,
-        anchor="mm",
-    )
-
-    note_y = bar_y0 + bar_h + int(12 / 25.4 * DPI)
-    draw_centered(
-        draw,
-        "悪質な場合は、警察へ通報のうえ然るべき措置を講じます。",
-        cx,
-        note_y,
-        f_note,
-        MUTED,
-    )
-
-    close_top = note_y + int(14 / 25.4 * DPI)
-    half2 = int(52 / 25.4 * DPI)
-    draw.line([(cx - half2, close_top), (cx + half2, close_top)], fill=BOX_LINE, width=2)
+    # 結び
+    close_y = box_y1 + int(28 / 25.4 * DPI)
     draw_centered(
         draw,
         "何卒ご理解とご協力のほど、お願い申し上げます。",
         cx,
-        close_top + int(16 / 25.4 * DPI),
+        close_y,
         f_close,
         INK,
     )
