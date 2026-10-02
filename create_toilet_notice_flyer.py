@@ -229,8 +229,14 @@ def render() -> Image.Image:
     close_top = note_y + int(14 / 25.4 * DPI)
     half2 = int(52 / 25.4 * DPI)
     draw.line([(cx - half2, close_top), (cx + half2, close_top)], fill=BOX_LINE, width=2)
-    draw_centered(draw, "何卒ご理解とご協力のほど、", cx, close_top + int(12 / 25.4 * DPI), f_close, INK)
-    draw_centered(draw, "お願い申し上げます。", cx, close_top + int(26 / 25.4 * DPI), f_close, INK)
+    draw_centered(
+        draw,
+        "何卒ご理解とご協力のほど、お願い申し上げます。",
+        cx,
+        close_top + int(16 / 25.4 * DPI),
+        f_close,
+        INK,
+    )
 
     return img
 
