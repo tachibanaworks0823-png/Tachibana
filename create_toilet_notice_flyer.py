@@ -105,11 +105,11 @@ def render() -> Image.Image:
 
     f_title = font("Black", 76)
     f_body = font("Regular", 50)
-    f_box_h = font("Medium", 56)
-    f_item = font("Regular", 58)
-    f_num = font("Bold", 58)
-    f_fee = font("Bold", 60)
-    f_note = font("Regular", 42)
+    f_box_h = font("Medium", 62)
+    f_item = font("Regular", 66)
+    f_num = font("Bold", 66)
+    f_fee = font("Bold", 68)
+    f_note = font("Regular", 46)
     f_close = font("Medium", 48)
 
     # ページ中央寄りに配置（削除後の余白を活かす）
@@ -130,10 +130,10 @@ def render() -> Image.Image:
     draw_centered(draw, "下記のとおり費用をご請求いたします。", cx, y, f_body, INK_SOFT)
 
     # 請求内容ボックス（広め・中の文字大きめ）
-    box_w = int(180 / 25.4 * DPI)
-    box_h = int(108 / 25.4 * DPI)
+    box_w = int(182 / 25.4 * DPI)
+    box_h = int(118 / 25.4 * DPI)
     box_x0 = cx - box_w // 2
-    box_y0 = int(126 / 25.4 * DPI)
+    box_y0 = int(122 / 25.4 * DPI)
     box_x1 = box_x0 + box_w
     box_y1 = box_y0 + box_h
 
@@ -145,14 +145,14 @@ def render() -> Image.Image:
         width=2,
     )
 
-    hy = box_y0 + int(20 / 25.4 * DPI)
-    sq = int(5 / 25.4 * DPI)
+    hy = box_y0 + int(22 / 25.4 * DPI)
+    sq = int(5.5 / 25.4 * DPI)
     draw.rectangle(
-        [box_x0 + int(16 / 25.4 * DPI), hy - sq // 2, box_x0 + int(16 / 25.4 * DPI) + sq, hy + sq // 2],
+        [box_x0 + int(14 / 25.4 * DPI), hy - sq // 2, box_x0 + int(14 / 25.4 * DPI) + sq, hy + sq // 2],
         fill=ACCENT,
     )
     draw.text(
-        (box_x0 + int(25 / 25.4 * DPI), hy),
+        (box_x0 + int(24 / 25.4 * DPI), hy),
         "請求内容",
         font=f_box_h,
         fill=INK,
@@ -163,10 +163,10 @@ def render() -> Image.Image:
         ("1.", "汚損による清掃費", "金50,000円"),
         ("2.", "破損による修繕費", "実費（全額）"),
     ]
-    iy = box_y0 + int(40 / 25.4 * DPI)
-    label_x = box_x0 + int(16 / 25.4 * DPI)
+    iy = box_y0 + int(44 / 25.4 * DPI)
+    label_x = box_x0 + int(14 / 25.4 * DPI)
     # 金額は左揃えで縦位置を揃える
-    fee_x = box_x0 + int(108 / 25.4 * DPI)
+    fee_x = box_x0 + int(112 / 25.4 * DPI)
     for num, label, fee in rows:
         draw.text((label_x, iy), num, font=f_num, fill=ACCENT, anchor="lt")
         draw.text(
@@ -177,7 +177,7 @@ def render() -> Image.Image:
             anchor="lt",
         )
         draw.text((fee_x, iy), fee, font=f_fee, fill=ACCENT, anchor="lt")
-        guide_y = iy + int(13 / 25.4 * DPI)
+        guide_y = iy + int(14 / 25.4 * DPI)
         gx0 = label_x + int(16 / 25.4 * DPI) + text_size(draw, label, f_item)[0] + int(4 / 25.4 * DPI)
         gx1 = fee_x - int(4 / 25.4 * DPI)
         if gx1 > gx0 + 8:
@@ -185,13 +185,13 @@ def render() -> Image.Image:
             while x < gx1:
                 draw.ellipse([x, guide_y, x + 3, guide_y + 3], fill=BOX_LINE)
                 x += 10
-        iy += int(26 / 25.4 * DPI)
+        iy += int(28 / 25.4 * DPI)
 
     draw_centered(
         draw,
         "※修繕費は、修理・交換に要した費用をそのままご請求します。",
         cx,
-        box_y1 - int(14 / 25.4 * DPI),
+        box_y1 - int(15 / 25.4 * DPI),
         f_note,
         MUTED,
     )
