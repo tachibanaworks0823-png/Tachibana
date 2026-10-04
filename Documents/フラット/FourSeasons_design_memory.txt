@@ -27,3 +27,6 @@ A1合成レイヤー（現行）:
 更新 2026-10-04c:
 - ロゴ上に GIRL'S BAR / ROUNGE PUB SNACK（参照どおり・サイズ大きめ）。
 - 背後花弁・余白調整は維持。料金・ロゴサイズ不変。
+
+更新 2026-10-04d:
+- 新店内写真 FourSeasons_interior_bar_counter.jpg を用いた盛り込みサンプル5種を samples_bar/ に作成（本採用未定）。
