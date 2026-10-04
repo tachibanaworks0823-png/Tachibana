@@ -4,4 +4,11 @@ Four Seasons 記憶用
 ファイル: FourSeasons_05bg_10price.png
 
 店内写真: アイスマット上のグラス除去済み
-ファイル: FourSeasons_店内_アイスマット掃除.png
+ファイル: FourSeasons_店内_アイスマット掃除.png / FourSeasons_interior_ice_mat_clean.png
+
+A1合成レイヤー（現行）:
+1) 店内写真フル（ズームなし）A1 7016×9933 @300dpi
+2) 黒レイヤー α≈150（今くらいの透明度）
+3) 提供店内ロゴ（白背景除去・文字白化）上部中央 ≈幅72% / y≈8%H
+4) 料金・飲み放題・カラオケ文言（白テキスト）
+主ファイル: FourSeasons_A1.jpg / FourSeasons_A1.png
