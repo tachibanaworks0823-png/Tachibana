@@ -24,9 +24,13 @@ JP = "/usr/share/fonts/truetype/wqy/wqy-microhei.ttc"
 
 PREVIEW = (1786, 2529)
 CHAT = (900, 1274)
-BLACK_OPACITY = 0.62
+# 暗部テクスチャ保持のため 0.62→0.40（compose_a1 の 0.50 よりさらに軽め）
+BLACK_OPACITY = 0.40
+# ベースを2倍解像度で組んでから縮小し、暗部のJPEG潰れを抑える
+BASE_SUPERSAMPLE = 2
 
 BOX = {"x0": 0.0922, "y0": 0.1240, "x1": 0.9211, "y1": 0.2920}
+LOUNGE_SRC = ASSETS / "interior_lounge.jpg"
 MAIN_SCALE_BOOST = 1.02
 NUDGE_UP = 0.035
 TEXT_NUDGE_DOWN = 0.035
@@ -60,26 +64,45 @@ def cover_bottom(im: Image.Image, tw: int, th: int) -> Image.Image:
     return r.crop(((nw - tw) // 2, nh - th, (nw - tw) // 2 + tw, nh))
 
 
+def load_lounge() -> Image.Image:
+    """添付の店内写真を直接使う（A1 JPEG 再エンコード経由だと暗部が潰れる）。"""
+    lounge = Image.open(LOUNGE_SRC).convert("RGB")
+    try:
+        from PIL import ImageOps
+
+        lounge = ImageOps.exif_transpose(lounge)
+    except Exception:
+        pass
+    return lounge
+
+
 def build_base(size: tuple[int, int]) -> Image.Image:
+    """元店内写真＋カウンターを合成。必要なら高解像度で組んでから縮小。"""
     W, H = size
-    lounge = Image.open(OUT / "FourSeasons_interior_A1_150dpi.jpg").convert("RGB")
+    ss = BASE_SUPERSAMPLE
+    work = (W * ss, H * ss)
+    lounge = load_lounge()
     bar = Image.open(ASSETS / "interior_bar_counter.jpg").convert("RGB")
     mark = np.array(Image.open(ASSETS / "interior_lounge_redline_mark.jpg").convert("RGB"))
     r, g, b = mark[:, :, 0].astype(int), mark[:, :, 1].astype(int), mark[:, :, 2].astype(int)
     red = (r > 180) & (g < 100) & (b < 100) & ((r - g) > 80) & ((r - b) > 80)
     cut_frac = float(np.where(red.any(axis=1))[0].min()) / mark.shape[0]
-    bar_h = int(round(W * bar.size[1] / bar.size[0]))
-    bar_r = bar.resize((W, bar_h), Image.Resampling.LANCZOS)
-    top_h = H - bar_h
+    Ww, Hw = work
+    bar_h = int(round(Ww * bar.size[1] / bar.size[0]))
+    bar_r = bar.resize((Ww, bar_h), Image.Resampling.LANCZOS)
+    top_h = Hw - bar_h
     cut_y = int(round(lounge.size[1] * cut_frac))
-    top = cover_bottom(lounge.crop((0, 0, lounge.size[0], cut_y)), W, top_h)
-    base = Image.new("RGB", (W, H))
+    top = cover_bottom(lounge.crop((0, 0, lounge.size[0], cut_y)), Ww, top_h)
+    base = Image.new("RGB", work)
     base.paste(top, (0, 0))
     base.paste(bar_r, (0, top_h))
+    if ss != 1:
+        base = base.resize(size, Image.Resampling.LANCZOS)
     return base
 
 
 def apply_black(base: Image.Image, opacity: float) -> Image.Image:
+    """均一な黒オーバーレイ（RGBA合成）。"""
     rgba = base.convert("RGBA")
     ov = Image.new("RGBA", base.size, (0, 0, 0, int(round(255 * opacity))))
     return Image.alpha_composite(rgba, ov)
@@ -287,12 +310,12 @@ def main() -> None:
 
     preview_path = PREV / "A1_signage_preview.jpg"
     chat_path = PREV / "A1_signage_preview_chat.jpg"
-    final.save(preview_path, "JPEG", quality=95, optimize=True, dpi=(96, 96))
-    final.resize(CHAT, Image.Resampling.LANCZOS).save(chat_path, "JPEG", quality=92, optimize=True)
+    final.save(preview_path, "JPEG", quality=97, optimize=True, dpi=(96, 96))
+    final.resize(CHAT, Image.Resampling.LANCZOS).save(chat_path, "JPEG", quality=95, optimize=True)
     print(f"PREVIEW ONLY: {preview_path}")
     print(
-        f"large soft petals fully removed / main mark only "
-        f"/ body text = font layers / logo mark unchanged"
+        f"lounge from original @ {BASE_SUPERSAMPLE}x / black={BLACK_OPACITY} "
+        f"/ large soft petals removed / body text = font layers"
     )
 
 
