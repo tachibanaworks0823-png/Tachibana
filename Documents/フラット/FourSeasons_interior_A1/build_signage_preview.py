@@ -35,79 +35,30 @@ def font(path: str, size: int, weight: int | None = None) -> ImageFont.FreeTypeF
 
 
 def build_logo() -> Image.Image:
-    """黒背景ロゴの黒を透過し、白背景ロゴの花びらで補強。ROUNGE→LOUNGE。"""
-    black = np.array(Image.open(ASSETS / "logo_four_seasons_blackbg.jpg").convert("RGBA"))
-    white = np.array(Image.open(ASSETS / "logo_four_seasons_whitebg.jpg").convert("RGBA"))
+    """店ロゴ原寸を使用。白枠内の黒プレートを切り出し、黒背景のみ透過。
 
-    br, bg, bb = black[:, :, 0].astype(int), black[:, :, 1].astype(int), black[:, :, 2].astype(int)
-    blum = (br + bg + bb) / 3.0
-    gray_petal = (blum > 28) & (blum < 95) & (bb < 130) & (br < 100)
-    cyan = (bb > 140) & (bg > 130) & (br < 210) & ((bb + bg) / 2 > br + 20)
+    文字・花びらは再描画せず元ピクセルを保持（参考画像と同じ見た目）。
+    ※元データは ROUNGE 表記。LOUNGE 修正は別途確認のうえ実施。
+    """
+    from PIL import ImageFilter, ImageOps
 
-    art = black.copy()
-    alpha = np.zeros(blum.shape, dtype=np.uint8)
-    alpha = np.where(gray_petal, np.clip((blum - 20) * 4.5, 0, 180).astype(np.uint8), alpha)
-    alpha = np.where(cyan, 255, alpha)
-    art[:, :, 3] = alpha
-    art_im = Image.fromarray(art, "RGBA")
-    if art_im.getbbox():
-        art_im = art_im.crop(art_im.getbbox())
-
-    wr, wg, wb = white[:, :, 0].astype(int), white[:, :, 1].astype(int), white[:, :, 2].astype(int)
-    near_white = (wr > 235) & (wg > 235) & (wb > 235)
-    near_black = (wr < 70) & (wg < 70) & (wb < 70)
-    soft = (wb > 170) & (wg > 150) & (wr > 120) & (wb >= wr - 5) & ~near_white
-    petals = white.copy()
-    petals[:, :, 3] = np.where(~near_white & ~near_black & ((wb > wr) | soft), 255, 0).astype(np.uint8)
-    petals[:, :, 3] = np.maximum(petals[:, :, 3], np.where(soft, 220, 0).astype(np.uint8))
-    petals_im = Image.fromarray(petals, "RGBA")
-    if petals_im.getbbox():
-        petals_im = petals_im.crop(petals_im.getbbox())
-
-    W, H = 1700, 480
-    canvas = Image.new("RGBA", (W, H), (0, 0, 0, 0))
-    draw = ImageDraw.Draw(canvas)
-
-    if art_im.size[0] > 0:
-        tw = int(W * 0.70)
-        sc = tw / art_im.size[0]
-        art_r = art_im.resize((tw, max(1, int(art_im.size[1] * sc))), Image.Resampling.LANCZOS)
-        canvas.alpha_composite(art_r, ((W - art_r.size[0]) // 2, (H - art_r.size[1]) // 2 - 5))
-
-    sub = font(JOSE, 34, 500)
-    main = font(PLAY, 118, 650)
-
-    def tsize(fnt, text):
-        bb = draw.textbbox((0, 0), text, font=fnt)
-        return bb[2] - bb[0], bb[3] - bb[1]
-
-    four_w, four_h = tsize(main, "Four")
-    sea_w, _ = tsize(main, "Seasons")
-    gap = int(W * 0.13)
-    total = four_w + gap + sea_w
-    left_x = (W - total) // 2
-    main_y = (H - four_h) // 2 + 18
-
-    pw = int(gap * 0.95)
-    sc = pw / petals_im.size[0]
-    pr = petals_im.resize((pw, max(1, int(petals_im.size[1] * sc))), Image.Resampling.LANCZOS)
-    px = left_x + four_w + (gap - pr.size[0]) // 2
-    py = main_y + four_h // 2 - pr.size[1] // 2 - 8
-    canvas.alpha_composite(pr, (px, py))
-
-    gbar, lounge = "GIRL'S BAR", "LOUNGE PUB SNACK"
-    gw, gh = tsize(sub, gbar)
-    lw, _ = tsize(sub, lounge)
-    four_cx = left_x + four_w // 2
-    sea_cx = left_x + four_w + gap + sea_w // 2
-    sub_y = main_y - gh - 14
-    draw.text((four_cx - gw // 2, sub_y), gbar, font=sub, fill=(255, 255, 255, 255))
-    draw.text((sea_cx - lw // 2, sub_y), lounge, font=sub, fill=(255, 255, 255, 255))
-    draw.text((left_x, main_y), "Four", font=main, fill=(255, 255, 255, 255))
-    draw.text((left_x + four_w + gap, main_y), "Seasons", font=main, fill=(255, 255, 255, 255))
-
-    logo = canvas.crop(canvas.getbbox())
-    logo.save(ASSETS / "logo_four_seasons_transparent_lounge.png")
+    src = ImageOps.exif_transpose(Image.open(ASSETS / "logo_four_seasons_blackbg.jpg")).convert("RGB")
+    arr = np.array(src)
+    lum = arr.mean(axis=2)
+    ys, xs = np.where(lum < 40)
+    plate = src.crop((int(xs.min()), int(ys.min()), int(xs.max()) + 1, int(ys.max()) + 1))
+    parr = np.array(plate).astype(np.float32)
+    pr, pg, pb = parr[:, :, 0], parr[:, :, 1], parr[:, :, 2]
+    plum = (pr + pg + pb) / 3.0
+    pmx = np.maximum(np.maximum(pr, pg), pb)
+    alpha = np.clip((pmx - 6.0) / (36.0 - 6.0) * 255.0, 0, 255)
+    alpha = np.where(plum > 42, 255, alpha)
+    alpha = np.where((pb > 140) & (pg > 120) & (pb + 5 >= pr), 255, alpha)
+    alpha = alpha.astype(np.uint8)
+    logo = Image.fromarray(np.dstack([parr.astype(np.uint8), alpha]), "RGBA")
+    logo.putalpha(logo.getchannel("A").filter(ImageFilter.GaussianBlur(0.3)))
+    logo = logo.crop(logo.getbbox())
+    logo.save(ASSETS / "logo_four_seasons_clean.png")
     logo.save(PREV / "logo_transparent_preview.png")
     return logo
 
@@ -162,7 +113,7 @@ def draw_content(canvas: Image.Image, logo: Image.Image) -> Image.Image:
     white = (255, 255, 255, 255)
     s = W / 1786
 
-    logo_w = int(W * 0.82)
+    logo_w = int(W * 0.72)
     logo_r = logo.resize(
         (logo_w, max(1, int(logo.size[1] * logo_w / logo.size[0]))),
         Image.Resampling.LANCZOS,
