@@ -116,19 +116,15 @@ def load_logo() -> Image.Image:
     """
     if MAIN_MARK.exists():
         mark = Image.open(MAIN_MARK).convert("RGBA")
-        # 暗いプレート残りを除去
+        # MAIN_MARK は既にクリーン。暗いプレートだけ落とし、文字の輪郭は残す。
         a = np.array(mark).astype(np.float32)
         lum = a[:, :, :3].mean(axis=2)
-        r, g, b = a[:, :, 0], a[:, :, 1], a[:, :, 2]
         al = a[:, :, 3]
-        keep_white = (lum > 160) & (al > 50)
-        keep_cyan = (b > r + 10) & (g > r) & (al > 70) & (lum > 90) & (lum < 230)
-        keep = keep_white | keep_cyan
-        keep_img = Image.fromarray((keep.astype(np.uint8) * 255), "L").filter(ImageFilter.MaxFilter(3))
-        keep = np.asarray(keep_img) > 127
-        a[:, :, 3] = np.where(keep, al, 0.0)
-        # 暗すぎる画素も落とす
-        a[:, :, 3] = np.where(lum < 90, 0.0, a[:, :, 3])
+        # ほぼ真っ黒のプレート残りのみ除去（文字アウトライン lum~0-80 は残す）
+        plate = (lum < 25) & (al > 0) & (lum > 0)
+        # 完全な黒埋め (0,0,0) も除去
+        black = (a[:, :, 0] < 8) & (a[:, :, 1] < 8) & (a[:, :, 2] < 8) & (al > 200)
+        a[:, :, 3] = np.where(plate | black, 0.0, al)
         out = Image.fromarray(np.clip(a, 0, 255).astype(np.uint8), "RGBA")
         bbox = out.getbbox()
         if bbox:
