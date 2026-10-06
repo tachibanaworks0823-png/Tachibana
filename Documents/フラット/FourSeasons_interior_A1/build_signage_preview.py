@@ -38,6 +38,10 @@ LINE_GAP = 90 / 2529  # 詳細行どうし
 SOURCE_LOGO = ASSETS / "logo_four_seasons_cyan_petals_source.png"
 LOGO_ASSET = ASSETS / "logo_four_seasons_cyan_petals.png"
 MAIN_W, MAIN_H = 364, 91
+# ソフト背景花弁＋中央マーク花弁をそれぞれ一回り小さく（文字は触らない）
+SOFT_PETAL_SCALE = 0.82
+SOFT_PETAL_BLUR = 3.5
+MARK_PETAL_SCALE = 0.82
 
 
 def font(path: str, size: int, weight: int | None = None) -> ImageFont.FreeTypeFont:
@@ -84,13 +88,52 @@ def apply_black(base: Image.Image, opacity: float) -> Image.Image:
 
 
 def load_logo() -> Image.Image:
-    """ソフト花弁つきロゴ。ソースがあれば下方向グローのみ弱めて使う（大きさ変更なし）。"""
+    """ソフト背景花弁を縮小し、赤丸の中央マーク花弁も一回り小さくする。文字は不変。"""
     src_path = SOURCE_LOGO if SOURCE_LOGO.exists() else LOGO_ASSET
     src = Image.open(src_path).convert("RGBA")
     arr = np.array(src).astype(np.float32)
     al = arr[:, :, 3]
-    sh = src.size[1]
-    # ソフト花弁が本文帯へ食い込まないよう、下方向は完全にフェードアウト
+    lum = arr[:, :, :3].mean(axis=2)
+    r, g, b = arr[:, :, 0], arr[:, :, 1], arr[:, :, 2]
+    sw, sh = src.size
+
+    white = (lum > 155) & (al > 60)
+    # 中央のソリッド花弁（赤丸のロゴマーク）
+    mark = (
+        (b > r + 8)
+        & (g > r - 2)
+        & (al > 120)
+        & (lum > 100)
+        & (lum < 240)
+        & (~white)
+    )
+    mark_img_mask = Image.fromarray((mark.astype(np.uint8) * 255), "L").filter(ImageFilter.MaxFilter(3))
+    mark = np.array(mark_img_mask) > 0
+
+    # --- ソフト背景花弁 ---
+    protect_soft = white | mark
+    soft = arr.copy()
+    soft[:, :, 3] = np.where(protect_soft, 0, al)
+    soft[:, :, 3] = np.where(soft[:, :, 3] < 10, 0, soft[:, :, 3])
+    soft_img = Image.fromarray(soft.astype(np.uint8), "RGBA")
+    nw = max(1, int(round(sw * SOFT_PETAL_SCALE)))
+    nh = max(1, int(round(sh * SOFT_PETAL_SCALE)))
+    soft_s = soft_img.resize((nw, nh), Image.Resampling.LANCZOS)
+    sa = np.array(soft_s.getchannel("A")).astype(np.float32)
+    yy, xx = np.mgrid[0:nh, 0:nw]
+    cy, cx = (nh - 1) / 2.0, (nw - 1) / 2.0
+    ry, rx = max(1.0, nh * 0.48), max(1.0, nw * 0.48)
+    ell = ((yy - cy) / ry) ** 2 + ((xx - cx) / rx) ** 2
+    feather = np.clip(1.0 - np.maximum(0.0, ell - 0.55) / 0.45, 0.0, 1.0)
+    sa *= feather
+    sa_img = Image.fromarray(np.clip(sa, 0, 255).astype(np.uint8), "L")
+    sa_img = sa_img.filter(ImageFilter.GaussianBlur(SOFT_PETAL_BLUR))
+    soft_s.putalpha(sa_img)
+
+    canvas = Image.new("RGBA", (sw, sh), (0, 0, 0, 0))
+    canvas.alpha_composite(soft_s, (int(round((sw - nw) / 2)), int(round((sh - nh) / 2))))
+
+    c_arr = np.array(canvas).astype(np.float32)
     fade_start = int(sh * 0.48)
     fade_end = int(sh * 0.78)
     fade = np.ones(sh, np.float32)
@@ -100,12 +143,33 @@ def load_logo() -> Image.Image:
         elif y >= fade_start:
             t = (y - fade_start) / max(1, fade_end - fade_start)
             fade[y] = 1.0 - t
-    # メインの白文字・小花弁は保護、大きなソフト花弁だけフェード
-    protect = al >= 120
-    arr[:, :, 3] = np.where(protect, al, al * fade[:, None])
-    out = Image.fromarray(arr.astype(np.uint8), "RGBA")
-    out.save(LOGO_ASSET)
-    return out
+    c_arr[:, :, 3] *= fade[:, None]
+    canvas = Image.fromarray(c_arr.astype(np.uint8), "RGBA")
+
+    # --- 白文字（縮小なし） ---
+    text_layer = arr.copy()
+    text_layer[:, :, 3] = np.where(white, al, 0)
+    canvas.alpha_composite(Image.fromarray(text_layer.astype(np.uint8), "RGBA"))
+
+    # --- 中央マーク花弁を一回り小さく（中心基準） ---
+    mb = Image.fromarray((mark.astype(np.uint8) * 255), "L").getbbox()
+    if mb is not None:
+        mark_rgba = arr.copy()
+        mark_rgba[:, :, 3] = np.where(mark, al, 0)
+        mark_img = Image.fromarray(mark_rgba.astype(np.uint8), "RGBA").crop(mb)
+        mw, mh = mark_img.size
+        mnw = max(1, int(round(mw * MARK_PETAL_SCALE)))
+        mnh = max(1, int(round(mh * MARK_PETAL_SCALE)))
+        mark_s = mark_img.resize((mnw, mnh), Image.Resampling.LANCZOS)
+        # 元bbox中心へ配置
+        mcx = (mb[0] + mb[2]) / 2.0
+        mcy = (mb[1] + mb[3]) / 2.0
+        mx = int(round(mcx - mnw / 2))
+        my = int(round(mcy - mnh / 2))
+        canvas.alpha_composite(mark_s, (mx, my))
+
+    canvas.save(LOGO_ASSET)
+    return canvas
 
 
 def main_bbox_in_logo(logo: Image.Image) -> tuple[int, int, int, int]:
@@ -254,7 +318,10 @@ def main() -> None:
     final.save(preview_path, "JPEG", quality=95, optimize=True, dpi=(96, 96))
     final.resize(CHAT, Image.Resampling.LANCZOS).save(chat_path, "JPEG", quality=92, optimize=True)
     print(f"PREVIEW ONLY: {preview_path}")
-    print("body text = font layers @2x downsample (no baseline JPEG copy) / logo = PNG petals+mark")
+    print(
+        f"soft={SOFT_PETAL_SCALE} mark-petals={MARK_PETAL_SCALE} "
+        f"/ body text = font layers / logo mark unchanged"
+    )
 
 
 if __name__ == "__main__":
