@@ -22,8 +22,8 @@ BAR = ASSETS / "interior_bar_counter.jpg"
 PREVIEW = (1786, 2529)
 PRINT150 = (3508, 4961)
 
-# 最前面レイヤー: 黒塗り 70%透過（不透明度 30%）
-BLACK_TRANSPARENCY = 0.70
+# 最前面レイヤー: 黒塗り（不透明度 50% / 透過 50%）
+BLACK_TRANSPARENCY = 0.50
 BLACK_ALPHA = int(round(255 * (1.0 - BLACK_TRANSPARENCY)))
 
 
