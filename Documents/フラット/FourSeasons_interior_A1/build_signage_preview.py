@@ -37,8 +37,9 @@ LINE_GAP = 90 / 2529  # 詳細行どうし
 
 SOURCE_LOGO = ASSETS / "logo_four_seasons_cyan_petals_source.png"
 LOGO_ASSET = ASSETS / "logo_four_seasons_cyan_petals.png"
+MAIN_MARK = ASSETS / "logo_four_seasons_main.png"
 MAIN_W, MAIN_H = 364, 91
-# 大きなソフト花弁は外す。中央マーク＋文字のみ（ソース画素そのまま）
+# 大きなソフト花弁は完全除外。クリーンなメインマーク（文字＋小花弁）のみ
 
 
 def font(path: str, size: int, weight: int | None = None) -> ImageFont.FreeTypeFont:
@@ -85,18 +86,60 @@ def apply_black(base: Image.Image, opacity: float) -> Image.Image:
 
 
 def load_logo() -> Image.Image:
-    """大きなソフト花弁を外し、中央マークと文字だけ残す。"""
-    src_path = SOURCE_LOGO if SOURCE_LOGO.exists() else LOGO_ASSET
-    src = Image.open(src_path).convert("RGBA")
-    arr = np.array(src).astype(np.float32)
-    al = arr[:, :, 3]
-    keep = al >= 100  # 文字＋中央マーク
-    arr[:, :, 3] = np.where(keep, al, 0.0)
-    out = Image.fromarray(np.clip(arr, 0, 255).astype(np.uint8), "RGBA")
-    # 余白を詰めて配置しやすくする
-    bbox = out.getbbox()
-    if bbox:
-        out = out.crop(bbox)
+    """大きなソフト花弁を完全に外す。文字＋中央小花弁のみ。
+
+    cyan_petals ソースは大きなソフト花弁を高アルファで含むため使わない。
+    クリーンな main マークを使う。
+    """
+    if MAIN_MARK.exists():
+        mark = Image.open(MAIN_MARK).convert("RGBA")
+        # 暗いプレート残りを除去
+        a = np.array(mark).astype(np.float32)
+        lum = a[:, :, :3].mean(axis=2)
+        r, g, b = a[:, :, 0], a[:, :, 1], a[:, :, 2]
+        al = a[:, :, 3]
+        keep_white = (lum > 160) & (al > 50)
+        keep_cyan = (b > r + 10) & (g > r) & (al > 70) & (lum > 90) & (lum < 230)
+        keep = keep_white | keep_cyan
+        keep_img = Image.fromarray((keep.astype(np.uint8) * 255), "L").filter(ImageFilter.MaxFilter(3))
+        keep = np.asarray(keep_img) > 127
+        a[:, :, 3] = np.where(keep, al, 0.0)
+        # 暗すぎる画素も落とす
+        a[:, :, 3] = np.where(lum < 90, 0.0, a[:, :, 3])
+        out = Image.fromarray(np.clip(a, 0, 255).astype(np.uint8), "RGBA")
+        bbox = out.getbbox()
+        if bbox:
+            out = out.crop(bbox)
+    else:
+        # フォールバック: ソースから白文字＋中央シアンだけ抽出
+        src = Image.open(SOURCE_LOGO).convert("RGBA")
+        a = np.array(src).astype(np.float32)
+        lum = a[:, :, :3].mean(axis=2)
+        r, g, b = a[:, :, 0], a[:, :, 1], a[:, :, 2]
+        al = a[:, :, 3]
+        white = (lum > 170) & (al > 80)
+        # 中央付近の高アルファシアンのみ（大きなソフトは低〜中アルファ＋広い）
+        cyan = (b > r + 12) & (g > r + 2) & (al > 160) & (lum > 120) & (lum < 230) & (~white)
+        # 面積の大きい拡散成分を除外するため、シアンドを中央バンドに限定
+        H, W = al.shape
+        cy0, cy1 = int(H * 0.25), int(H * 0.75)
+        cx0, cx1 = int(W * 0.30), int(W * 0.70)
+        band = np.zeros_like(cyan)
+        band[cy0:cy1, cx0:cx1] = True
+        cyan = cyan & band
+        keep = white | cyan
+        a[:, :, 3] = np.where(keep, al, 0.0)
+        out = Image.fromarray(np.clip(a, 0, 255).astype(np.uint8), "RGBA")
+        bbox = out.getbbox()
+        if bbox:
+            out = out.crop(bbox)
+
+    # 大きなソフト花弁が残っていないことを確認
+    oa = np.array(out)
+    soft_left = ((oa[:, :, 3] > 10) & (oa[:, :, 3] < 100) & (oa[:, :, :3].mean(axis=2) < 160)).sum()
+    if soft_left > 200:
+        raise SystemExit(f"QUALITY GATE FAIL: soft large petals still present ({soft_left} px)")
+
     out.save(LOGO_ASSET)
     return out
 
@@ -248,7 +291,7 @@ def main() -> None:
     final.resize(CHAT, Image.Resampling.LANCZOS).save(chat_path, "JPEG", quality=92, optimize=True)
     print(f"PREVIEW ONLY: {preview_path}")
     print(
-        f"large soft petals removed / mark+text only "
+        f"large soft petals fully removed / main mark only "
         f"/ body text = font layers / logo mark unchanged"
     )
 
