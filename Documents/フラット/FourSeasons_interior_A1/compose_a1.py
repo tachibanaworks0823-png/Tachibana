@@ -22,6 +22,10 @@ BAR = ASSETS / "interior_bar_counter.jpg"
 PREVIEW = (1786, 2529)
 PRINT150 = (3508, 4961)
 
+# 最前面レイヤー: 黒塗り 70%透過（不透明度 30%）
+BLACK_TRANSPARENCY = 0.70
+BLACK_ALPHA = int(round(255 * (1.0 - BLACK_TRANSPARENCY)))
+
 
 def red_cut_fraction(mark_path: Path) -> float:
     arr = np.array(Image.open(mark_path).convert("RGB"))
@@ -58,6 +62,13 @@ def compose(lounge_top: Image.Image, bar: Image.Image, size: tuple[int, int]) ->
     return out
 
 
+def black_overlay_top(im: Image.Image) -> Image.Image:
+    """新規レイヤーを1番上に配置: 黒塗り70%透過。"""
+    base = im.convert("RGBA")
+    overlay = Image.new("RGBA", base.size, (0, 0, 0, BLACK_ALPHA))
+    return Image.alpha_composite(base, overlay).convert("RGB")
+
+
 def save_jpg(im: Image.Image, path: Path, dpi: int) -> None:
     im.save(path, "JPEG", quality=95, optimize=True, dpi=(dpi, dpi))
 
@@ -88,11 +99,20 @@ def main() -> None:
     save_jpg(print150, OUT / "FourSeasons_composite_A1_150dpi.jpg", 150)
     save_pdf(print150, OUT / "FourSeasons_composite_A1.pdf")
 
+    # 最前面: 黒塗り70%透過
+    preview_ov = black_overlay_top(preview)
+    print150_ov = black_overlay_top(print150)
+    save_jpg(preview_ov, OUT / "FourSeasons_composite_A1_overlay_preview.jpg", 96)
+    save_jpg(print150_ov, OUT / "FourSeasons_composite_A1_overlay_150dpi.jpg", 150)
+    save_pdf(print150_ov, OUT / "FourSeasons_composite_A1_overlay.pdf")
+
     chat_w = 900
     chat_h = int(round(chat_w * 841 / 594))
     chat = preview.resize((chat_w, chat_h), Image.Resampling.LANCZOS)
     save_jpg(chat, OUT / "FourSeasons_composite_A1_chat.jpg", 72)
-    print("wrote composite A1 outputs")
+    chat_ov = preview_ov.resize((chat_w, chat_h), Image.Resampling.LANCZOS)
+    save_jpg(chat_ov, OUT / "FourSeasons_composite_A1_overlay_chat.jpg", 72)
+    print(f"wrote composite A1 outputs (black overlay {BLACK_TRANSPARENCY:.0%} transparent)")
 
 
 if __name__ == "__main__":
