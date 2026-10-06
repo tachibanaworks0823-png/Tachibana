@@ -30,9 +30,10 @@ BOX = {"x0": 0.0922, "y0": 0.1240, "x1": 0.9211, "y1": 0.2920}
 MAIN_SCALE_BOOST = 1.02
 NUDGE_UP = 0.035
 TEXT_NUDGE_DOWN = 0.035
-# 飲み放題の下に広めの空き（以前の指定をテキスト座標で再現）
-NOMI_GAP = 0.058
-LINE_GAP = 0.036
+# 以前プレビューの行間（中心間px / 2529）に合わせる
+TAX_TO_NOMI = 186 / 2529  # TAX → 飲み放題
+NOMI_GAP = 150 / 2529  # 飲み放題 → 詳細1行目
+LINE_GAP = 90 / 2529  # 詳細行どうし
 
 SOURCE_LOGO = ASSETS / "logo_four_seasons_cyan_petals_source.png"
 LOGO_ASSET = ASSETS / "logo_four_seasons_cyan_petals.png"
@@ -194,7 +195,7 @@ def draw_text_layer(size: tuple[int, int], logo_bottom_y: int) -> Image.Image:
     y += int(70 * s)
     center_text(draw, (cx, y), "TAX 20%", f_mid, white)
 
-    y += int(90 * s)
+    y += int(H * TAX_TO_NOMI)
     center_text(draw, (cx, y), "飲み放題", f_nomi, white)
 
     y += int(H * NOMI_GAP)
