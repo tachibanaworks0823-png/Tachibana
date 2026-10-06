@@ -23,6 +23,9 @@ PREVIEW = (1786, 2529)
 CHAT = (900, 1274)
 BLACK_OPACITY = 0.62  # プレビュー値。承認後に本番調整可
 
+# ロゴ配置赤枠（ユーザー指定マークから検出した内側比率）
+BOX = {"x0": 0.0922, "y0": 0.1240, "x1": 0.9211, "y1": 0.2920}
+
 
 def font(path: str, size: int, weight: int | None = None) -> ImageFont.FreeTypeFont:
     f = ImageFont.truetype(path, size)
@@ -113,16 +116,18 @@ def draw_content(canvas: Image.Image, logo: Image.Image) -> Image.Image:
     white = (255, 255, 255, 255)
     s = W / 1786
 
-    logo_w = int(W * 0.88)  # reference ~88% width
-    # Use wide banner crop of logo (text+petals), not full square plate
     banner_path = ASSETS / "logo_four_seasons_banner.png"
     if banner_path.exists():
         logo = Image.open(banner_path).convert("RGBA")
-    logo_r = logo.resize(
-        (logo_w, max(1, int(logo.size[1] * logo_w / logo.size[0]))),
-        Image.Resampling.LANCZOS,
-    )
-    img.alpha_composite(logo_r, ((W - logo_r.size[0]) // 2, int(H * 0.05)))
+    x0 = int(round(BOX["x0"] * W))
+    y0 = int(round(BOX["y0"] * H))
+    x1 = int(round(BOX["x1"] * W))
+    y1 = int(round(BOX["y1"] * H))
+    box_w, box_h = x1 - x0, y1 - y0
+    lw, lh = logo.size
+    scale = min(box_w / lw, box_h / lh)
+    logo_r = logo.resize((max(1, int(round(lw * scale))), max(1, int(round(lh * scale)))), Image.Resampling.LANCZOS)
+    img.alpha_composite(logo_r, (x0 + (box_w - logo_r.size[0]) // 2, y0 + (box_h - logo_r.size[1]) // 2))
 
     f_label = font(JP, int(50 * s))
     f_price = font(JOSE, int(108 * s), 650)
@@ -131,7 +136,7 @@ def draw_content(canvas: Image.Image, logo: Image.Image) -> Image.Image:
     f_body = font(JP, int(40 * s))
 
     cx = W / 2
-    y = int(H * 0.36)
+    y = y1 + int(H * 0.04)
     col = int(140 * s)
 
     center_text(draw, (cx - col, y), "カウンター", f_label, white)
