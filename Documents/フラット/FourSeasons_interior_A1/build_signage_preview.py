@@ -24,8 +24,8 @@ JP = "/usr/share/fonts/truetype/wqy/wqy-microhei.ttc"
 
 PREVIEW = (1786, 2529)
 CHAT = (900, 1274)
-# 暗部テクスチャ保持のため 0.62→0.40（compose_a1 の 0.50 よりさらに軽め）
-BLACK_OPACITY = 0.40
+# 暗部テクスチャ保持（0.62 だと潰れる。compose_a1 は 0.50）
+BLACK_OPACITY = 0.32
 # ベースを2倍解像度で組んでから縮小し、暗部のJPEG潰れを抑える
 BASE_SUPERSAMPLE = 2
 
