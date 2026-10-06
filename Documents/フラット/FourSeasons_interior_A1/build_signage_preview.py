@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """A1看板プレビュー生成（本番反映前の確認用）。
 
-本文テキストは直前の正常プレビューを保持し、ロゴ層だけ差し替える。
-花弁の大きさは変更しない（下方向ソフトグローの弱めのみ）。
+本文はフォントでテキスト描画（JPEGコピー／帯ずらしはしない）。
+ロゴ（花弁＋マーク）は透過PNGを配置する。
 """
 
 from __future__ import annotations
@@ -10,29 +10,43 @@ from __future__ import annotations
 from pathlib import Path
 
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
 ROOT = Path(__file__).resolve().parent
 ASSETS = ROOT / "assets"
 OUT = ROOT / "output"
+FONTS = ASSETS / "fonts"
 PREV = OUT / "preview"
 PREV.mkdir(parents=True, exist_ok=True)
+
+JOSE = str(FONTS / "JosefinSans[wght].ttf")
+JP = "/usr/share/fonts/truetype/wqy/wqy-microhei.ttc"
 
 PREVIEW = (1786, 2529)
 CHAT = (900, 1274)
 BLACK_OPACITY = 0.62
+
 BOX = {"x0": 0.0922, "y0": 0.1240, "x1": 0.9211, "y1": 0.2920}
 MAIN_SCALE_BOOST = 1.02
 NUDGE_UP = 0.035
-MAIN_W, MAIN_H = 364, 91
-# 本文開始位置（ここより下は前回プレビューのテキストをそのまま使う）
-TEXT_CUT_FRAC = 0.310
-BLEND_BAND = 40
+TEXT_NUDGE_DOWN = 0.035
+# 飲み放題の下に広めの空き（以前の指定をテキスト座標で再現）
+NOMI_GAP = 0.058
+LINE_GAP = 0.036
 
-# 花弁大きさ変更なし。下方向グローだけ弱める。
 SOURCE_LOGO = ASSETS / "logo_four_seasons_cyan_petals_source.png"
-# 本文を保持する基準プレビュー（テキストが正常な版）
-BASELINE_PREVIEW = PREV / "A1_signage_preview_baseline.jpg"
+LOGO_ASSET = ASSETS / "logo_four_seasons_cyan_petals.png"
+MAIN_W, MAIN_H = 364, 91
+
+
+def font(path: str, size: int, weight: int | None = None) -> ImageFont.FreeTypeFont:
+    f = ImageFont.truetype(path, size)
+    if weight is not None:
+        try:
+            f.set_variation_by_axes([weight])
+        except Exception:
+            pass
+    return f
 
 
 def cover_bottom(im: Image.Image, tw: int, th: int) -> Image.Image:
@@ -68,27 +82,28 @@ def apply_black(base: Image.Image, opacity: float) -> Image.Image:
     return Image.alpha_composite(rgba, ov)
 
 
-def load_logo_no_size_change() -> Image.Image:
-    """ソースロゴを読み、大きさはそのまま下方向グローだけ弱める。"""
-    src_path = SOURCE_LOGO if SOURCE_LOGO.exists() else ASSETS / "logo_four_seasons_cyan_petals.png"
+def load_logo() -> Image.Image:
+    """ソフト花弁つきロゴ。ソースがあれば下方向グローのみ弱めて使う（大きさ変更なし）。"""
+    src_path = SOURCE_LOGO if SOURCE_LOGO.exists() else LOGO_ASSET
     src = Image.open(src_path).convert("RGBA")
     arr = np.array(src).astype(np.float32)
     al = arr[:, :, 3]
     sh = src.size[1]
-    fade_start = int(sh * 0.55)
-    fade_end = int(sh * 0.92)
+    # ソフト花弁が本文帯へ食い込まないよう、下方向は完全にフェードアウト
+    fade_start = int(sh * 0.48)
+    fade_end = int(sh * 0.78)
     fade = np.ones(sh, np.float32)
     for y in range(sh):
         if y >= fade_end:
-            fade[y] = 0.20
+            fade[y] = 0.0
         elif y >= fade_start:
             t = (y - fade_start) / max(1, fade_end - fade_start)
-            fade[y] = 1.0 - 0.80 * t
-    protect = al >= 100
+            fade[y] = 1.0 - t
+    # メインの白文字・小花弁は保護、大きなソフト花弁だけフェード
+    protect = al >= 120
     arr[:, :, 3] = np.where(protect, al, al * fade[:, None])
     out = Image.fromarray(arr.astype(np.uint8), "RGBA")
-    assert out.size == src.size  # 大きさ変更なし
-    out.save(ASSETS / "logo_four_seasons_cyan_petals.png")
+    out.save(LOGO_ASSET)
     return out
 
 
@@ -128,50 +143,117 @@ def place_logo(canvas: Image.Image, logo: Image.Image, main_bbox: tuple[int, int
     sm = tuple(int(round(v * scale)) for v in main_bbox)
     lx = int(round(x0 + box_w / 2 - (sm[0] + sm[2]) / 2))
     ly = int(round(y0 + box_h / 2 - (sm[1] + sm[3]) / 2 - H * NUDGE_UP))
+    # 本文開始より下へ伸びるロゴ画素は捨てる（背景崩れ防止）
+    max_bottom = y1 + int(H * 0.02)
+    if ly + logo_r.size[1] > max_bottom:
+        keep_h = max(1, max_bottom - ly)
+        logo_r = logo_r.crop((0, 0, logo_r.size[0], keep_h))
     img.alpha_composite(logo_r, (lx, ly))
     return img
 
 
-def merge_keep_baseline_text(baseline: Image.Image, with_new_logo: Image.Image) -> Image.Image:
-    """上＝新ロゴ、下＝基準プレビューの本文（ピクセル一致）。"""
-    W, H = baseline.size
-    before = np.array(baseline.convert("RGB")).astype(np.float32)
-    new_rgb = np.array(with_new_logo.convert("RGB")).astype(np.float32)
-    text_cut = int(TEXT_CUT_FRAC * H)
-    out = before.copy()
-    out[:text_cut, :, :] = new_rgb[:text_cut, :, :]
-    band = BLEND_BAND
-    for i in range(band):
-        y = text_cut - band + i
-        if y < 0:
-            continue
-        t = i / band
-        out[y] = new_rgb[y] * (1.0 - t) + before[y] * t
-    return Image.fromarray(np.clip(out, 0, 255).astype(np.uint8), "RGB")
+def center_text(draw: ImageDraw.ImageDraw, xy: tuple[float, float], text: str, fnt, fill) -> None:
+    x, y = xy
+    bb = draw.textbbox((0, 0), text, font=fnt)
+    w, h = bb[2] - bb[0], bb[3] - bb[1]
+    draw.text((x - w / 2 - bb[0], y - h / 2 - bb[1]), text, font=fnt, fill=fill)
+
+
+def draw_text_layer(size: tuple[int, int], logo_bottom_y: int) -> Image.Image:
+    """本文だけを透明レイヤーにフォント描画する。"""
+    W, H = size
+    layer = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(layer)
+    white = (255, 255, 255, 255)
+    s = W / 1786.0
+
+    f_label = font(JP, int(82 * s))
+    f_price = font(JOSE, int(168 * s), 650)
+    f_mid = font(JOSE, int(70 * s), 500)
+    f_mid_jp = font(JP, int(70 * s))
+    f_nomi = font(JP, int(86 * s))
+    f_body = font(JP, int(78 * s))
+
+    cx = W / 2
+    y = logo_bottom_y + int(H * (0.04 + TEXT_NUDGE_DOWN))
+    # 基準プレビューの価格中心（canvas中央から約330px）に合わせる
+    col_label = int(260 * s)
+    col_price = int(330 * s)
+
+    center_text(draw, (cx - col_label, y), "カウンター", f_label, white)
+    center_text(draw, (cx + col_label, y), "ボックス", f_label, white)
+    div_h = int(70 * s)
+    draw.line([(cx, y - div_h // 2), (cx, y + div_h // 2)], fill=white, width=max(2, int(3 * s)))
+
+    y += int(120 * s)
+    center_text(draw, (cx - col_price, y), "¥3,000", f_price, white)
+    center_text(draw, (cx + col_price, y), "¥4,000", f_price, white)
+
+    y += int(120 * s)
+    center_text(draw, (cx, y), "1SET 50分", f_mid_jp, white)
+    y += int(70 * s)
+    center_text(draw, (cx, y), "TAX 20%", f_mid, white)
+
+    y += int(90 * s)
+    center_text(draw, (cx, y), "飲み放題", f_nomi, white)
+
+    y += int(H * NOMI_GAP)
+    for line in [
+        "焼酎・ウイスキー・リキュール各種",
+        "割りもの(お茶類・炭酸など)",
+        "キープボトル各種あり",
+    ]:
+        center_text(draw, (cx, y), line, f_body, white)
+        y += int(H * LINE_GAP)
+
+    return layer
+
+
+def soft_text_glow(text_layer: Image.Image) -> Image.Image:
+    """視認用の軽い外側グロー（テキスト自体はシャープなまま）。"""
+    alpha = text_layer.getchannel("A")
+    glow = alpha.filter(ImageFilter.GaussianBlur(5))
+    glow = glow.point(lambda p: min(255, int(p * 0.45)))
+    glow_rgba = Image.merge(
+        "RGBA",
+        (
+            Image.new("L", text_layer.size, 255),
+            Image.new("L", text_layer.size, 255),
+            Image.new("L", text_layer.size, 255),
+            glow,
+        ),
+    )
+    out = Image.new("RGBA", text_layer.size, (0, 0, 0, 0))
+    out = Image.alpha_composite(out, glow_rgba)
+    out = Image.alpha_composite(out, text_layer)
+    return out
+
+
+def render_body_text(size: tuple[int, int], logo_bottom_y: int) -> Image.Image:
+    """本文を2倍解像度で描画してから縮小し、シャープなテキストレイヤーにする。"""
+    W, H = size
+    hi = (W * 2, H * 2)
+    layer_hi = draw_text_layer(hi, logo_bottom_y * 2)
+    layer_hi = soft_text_glow(layer_hi)
+    return layer_hi.resize(size, Image.Resampling.LANCZOS)
 
 
 def main() -> None:
-    if not BASELINE_PREVIEW.exists():
-        raise SystemExit(
-            f"Missing baseline preview with good text: {BASELINE_PREVIEW}\n"
-            "Copy a known-good A1_signage_preview.jpg there first."
-        )
-    if not SOURCE_LOGO.exists():
-        raise SystemExit(f"Missing source logo (size-locked): {SOURCE_LOGO}")
-
-    logo = load_logo_no_size_change()
+    logo = load_logo()
     main_bbox = main_bbox_in_logo(logo)
     canvas = apply_black(build_base(PREVIEW), BLACK_OPACITY)
     with_logo = place_logo(canvas, logo, main_bbox)
-    baseline = Image.open(BASELINE_PREVIEW)
-    final = merge_keep_baseline_text(baseline, with_logo)
+
+    y1 = int(round(BOX["y1"] * PREVIEW[1]))
+    text_layer = render_body_text(PREVIEW, y1)
+    final = Image.alpha_composite(with_logo.convert("RGBA"), text_layer).convert("RGB")
 
     preview_path = PREV / "A1_signage_preview.jpg"
     chat_path = PREV / "A1_signage_preview_chat.jpg"
     final.save(preview_path, "JPEG", quality=95, optimize=True, dpi=(96, 96))
     final.resize(CHAT, Image.Resampling.LANCZOS).save(chat_path, "JPEG", quality=92, optimize=True)
     print(f"PREVIEW ONLY: {preview_path}")
-    print(f"logo size unchanged={logo.size} / body text from baseline / black={BLACK_OPACITY}")
+    print("body text = font layers @2x downsample (no baseline JPEG copy) / logo = PNG petals+mark")
 
 
 if __name__ == "__main__":
