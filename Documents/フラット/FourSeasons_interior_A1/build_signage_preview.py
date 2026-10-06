@@ -38,10 +38,7 @@ LINE_GAP = 90 / 2529  # 詳細行どうし
 SOURCE_LOGO = ASSETS / "logo_four_seasons_cyan_petals_source.png"
 LOGO_ASSET = ASSETS / "logo_four_seasons_cyan_petals.png"
 MAIN_W, MAIN_H = 364, 91
-# 大きなソフト花弁: 外側をフェードして一回り小さく見せる（リサイズしない＝掠れ・欠け防止）
-# 中央マーク／文字はソース画素で完全上書き
-SOFT_PETAL_INNER = 0.50  # ここまで不変
-SOFT_PETAL_OUTER = 0.82  # ここでソフトアルファ0
+# 大きなソフト花弁は外す。中央マーク＋文字のみ（ソース画素そのまま）
 
 
 def font(path: str, size: int, weight: int | None = None) -> ImageFont.FreeTypeFont:
@@ -88,55 +85,20 @@ def apply_black(base: Image.Image, opacity: float) -> Image.Image:
 
 
 def load_logo() -> Image.Image:
-    """大きなソフト花弁を外側フェードで一回り小さく。マーク／文字はソース完全上書き。
-
-    リサイズしないので4枚構造とソフト勾配を壊さない。
-    """
+    """大きなソフト花弁を外し、中央マークと文字だけ残す。"""
     src_path = SOURCE_LOGO if SOURCE_LOGO.exists() else LOGO_ASSET
     src = Image.open(src_path).convert("RGBA")
     arr = np.array(src).astype(np.float32)
     al = arr[:, :, 3]
-    sw, sh = src.size
-    protect = al >= 100
-
-    yy, xx = np.mgrid[0:sh, 0:sw]
-    cy, cx = (sh - 1) / 2.0, (sw - 1) / 2.0
-    # ソースソフトの実効半径に合わせる
-    soft_m = (al > 15) & (~protect)
-    if soft_m.any():
-        ys, xs = np.where(soft_m)
-        ry = max(1.0, float(np.percentile(np.abs(ys - cy), 95)))
-        rx = max(1.0, float(np.percentile(np.abs(xs - cx), 95)))
-    else:
-        ry, rx = sh * 0.45, sw * 0.45
-    dist = np.sqrt(((yy - cy) / ry) ** 2 + ((xx - cx) / rx) ** 2)
-    # inner→outer で 1→0
-    t = (dist - SOFT_PETAL_INNER) / max(1e-6, SOFT_PETAL_OUTER - SOFT_PETAL_INNER)
-    window = np.clip(1.0 - t, 0.0, 1.0)
-    # smoothstep
-    window = window * window * (3.0 - 2.0 * window)
-
-    out = arr.copy()
-    soft = ~protect
-    out[:, :, 3] = np.where(soft, al * window, al)
-
-    # 下方向フェード（本文帯）
-    fade_start = int(sh * 0.55)
-    fade_end = int(sh * 0.90)
-    fade = np.ones(sh, np.float32)
-    for y in range(sh):
-        if y >= fade_end:
-            fade[y] = 0.15
-        elif y >= fade_start:
-            u = (y - fade_start) / max(1, fade_end - fade_start)
-            fade[y] = 1.0 - 0.85 * u
-    out[:, :, 3] = np.where(protect, out[:, :, 3], out[:, :, 3] * fade[:, None])
-
-    # 念のためマーク／文字をソースで再上書き
-    out[protect] = arr[protect]
-    result = Image.fromarray(np.clip(out, 0, 255).astype(np.uint8), "RGBA")
-    result.save(LOGO_ASSET)
-    return result
+    keep = al >= 100  # 文字＋中央マーク
+    arr[:, :, 3] = np.where(keep, al, 0.0)
+    out = Image.fromarray(np.clip(arr, 0, 255).astype(np.uint8), "RGBA")
+    # 余白を詰めて配置しやすくする
+    bbox = out.getbbox()
+    if bbox:
+        out = out.crop(bbox)
+    out.save(LOGO_ASSET)
+    return out
 
 
 def main_bbox_in_logo(logo: Image.Image) -> tuple[int, int, int, int]:
@@ -286,7 +248,7 @@ def main() -> None:
     final.resize(CHAT, Image.Resampling.LANCZOS).save(chat_path, "JPEG", quality=92, optimize=True)
     print(f"PREVIEW ONLY: {preview_path}")
     print(
-        f"soft petals faded to {SOFT_PETAL_OUTER} / mark+text = exact source "
+        f"large soft petals removed / mark+text only "
         f"/ body text = font layers / logo mark unchanged"
     )
 
