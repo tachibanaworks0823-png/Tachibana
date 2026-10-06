@@ -113,12 +113,16 @@ def draw_content(canvas: Image.Image, logo: Image.Image) -> Image.Image:
     white = (255, 255, 255, 255)
     s = W / 1786
 
-    logo_w = int(W * 0.72)
+    logo_w = int(W * 0.88)  # reference ~88% width
+    # Use wide banner crop of logo (text+petals), not full square plate
+    banner_path = ASSETS / "logo_four_seasons_banner.png"
+    if banner_path.exists():
+        logo = Image.open(banner_path).convert("RGBA")
     logo_r = logo.resize(
         (logo_w, max(1, int(logo.size[1] * logo_w / logo.size[0]))),
         Image.Resampling.LANCZOS,
     )
-    img.alpha_composite(logo_r, ((W - logo_r.size[0]) // 2, int(H * 0.055)))
+    img.alpha_composite(logo_r, ((W - logo_r.size[0]) // 2, int(H * 0.05)))
 
     f_label = font(JP, int(50 * s))
     f_price = font(JOSE, int(108 * s), 650)
