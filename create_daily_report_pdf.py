@@ -158,7 +158,7 @@ def build():
     # ---- 特筆事項（均一5マス） ----
     note_lines = 5
     label_h = 4.5 * mm
-    row_h = 7.2 * mm  # 書きやすい高さ・均一
+    row_h = 8.5 * mm  # 書きやすい高さ・均一
     note_h = label_h + note_lines * row_h
     draw_rect(c, x0, y - note_h, CONTENT_W, note_h, stroke=0.9)
     c.setFillColorRGB(0.94, 0.94, 0.94)
