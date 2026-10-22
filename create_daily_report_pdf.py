@@ -102,7 +102,7 @@ def build():
     y -= meta_h + 2.5 * mm
 
     # ---- 出勤者 ----
-    staff_h = 12 * mm
+    staff_h = 11 * mm
     draw_rect(c, x0, y - staff_h, CONTENT_W, staff_h, stroke=0.9)
     c.setFillColorRGB(0.94, 0.94, 0.94)
     c.rect(x0, y - staff_h, label_w, staff_h, stroke=0, fill=1)
@@ -110,13 +110,26 @@ def build():
     draw_vline(c, x0 + label_w, y - staff_h, y, stroke=0.6)
     centered_text(c, "出勤者", x0 + label_w / 2, y - staff_h / 2 - 1.5 * mm, size=9)
     for i in range(2):
-        ly = y - 5 * mm - i * 4 * mm
+        ly = y - 4.5 * mm - i * 3.8 * mm
         draw_hline(c, x0 + label_w + 3 * mm, x0 + CONTENT_W - 3 * mm, ly, stroke=0.4)
-    y -= staff_h + 2.5 * mm
+    y -= staff_h + 2 * mm
+
+    # ---- 配置 ----
+    assign_h = 11 * mm
+    draw_rect(c, x0, y - assign_h, CONTENT_W, assign_h, stroke=0.9)
+    c.setFillColorRGB(0.94, 0.94, 0.94)
+    c.rect(x0, y - assign_h, label_w, assign_h, stroke=0, fill=1)
+    c.setFillColorRGB(0, 0, 0)
+    draw_vline(c, x0 + label_w, y - assign_h, y, stroke=0.6)
+    centered_text(c, "配置", x0 + label_w / 2, y - assign_h / 2 - 1.5 * mm, size=9)
+    for i in range(2):
+        ly = y - 4.5 * mm - i * 3.8 * mm
+        draw_hline(c, x0 + label_w + 3 * mm, x0 + CONTENT_W - 3 * mm, ly, stroke=0.4)
+    y -= assign_h + 2 * mm
 
     # ---- 特筆事項（5行） ----
     note_lines = 5
-    line_gap = 5.4 * mm
+    line_gap = 5.0 * mm
     label_h = 5 * mm
     note_h = label_h + note_lines * line_gap + 1 * mm
     draw_rect(c, x0, y - note_h, CONTENT_W, note_h, stroke=0.9)
