@@ -50,11 +50,13 @@ def left_text(c, text, x, y, font="JP", size=10):
     c.drawString(x, y, text)
 
 
-def draw_name_place_grid(c, x0, y, title, label_w, content_w, cells=5):
-    """左ラベル＋名前/配置場所の5マス表。戻り値は次の y（上端）。"""
-    name_h = 8.5 * mm
-    place_h = 8.5 * mm
-    total_h = name_h + place_h
+def draw_name_place_grid(
+    c, x0, y, title, label_w, content_w, cells=5, top_label="名前", bottom_label="配置場所"
+):
+    """左ラベル＋上段/下段の5マス表。戻り値は次の y（上端）。"""
+    top_h = 8.5 * mm
+    bottom_h = 8.5 * mm
+    total_h = top_h + bottom_h
     grid_w = content_w - label_w
     cell_w = grid_w / cells
 
@@ -67,16 +69,16 @@ def draw_name_place_grid(c, x0, y, title, label_w, content_w, cells=5):
     draw_vline(c, x0 + label_w, y - total_h, y, stroke=0.6)
     centered_text(c, title, x0 + label_w / 2, y - total_h / 2 - 1.5 * mm, size=9)
 
-    # 名前行 / 配置場所行の区切り
-    draw_hline(c, x0 + label_w, x0 + content_w, y - name_h, stroke=0.55)
+    # 上段 / 下段の区切り
+    draw_hline(c, x0 + label_w, x0 + content_w, y - top_h, stroke=0.55)
 
     # 縦マス区切り＋小ラベル
     for i in range(cells):
         cx = x0 + label_w + i * cell_w
         if i > 0:
             draw_vline(c, cx, y - total_h, y, stroke=0.5)
-        left_text(c, "名前", cx + 1.2 * mm, y - 3.2 * mm, size=6)
-        left_text(c, "配置場所", cx + 1.2 * mm, y - name_h - 3.2 * mm, size=6)
+        left_text(c, top_label, cx + 1.2 * mm, y - 3.2 * mm, size=6)
+        left_text(c, bottom_label, cx + 1.2 * mm, y - top_h - 3.2 * mm, size=6)
 
     return y - total_h
 
@@ -125,28 +127,48 @@ def build():
     centered_text(c, "記載者", x0 + col_w + label_w / 2, y - meta_h / 2 - 1.5 * mm, size=9)
     y -= meta_h + 2 * mm
 
-    # ---- 出勤者（名前×5 / 配置場所×5） ----
-    y = draw_name_place_grid(c, x0, y, "出勤者", label_w, CONTENT_W, cells=5)
+    # ---- 出勤者（出勤時間×5 / 名前×5） ----
+    y = draw_name_place_grid(
+        c,
+        x0,
+        y,
+        "出勤者",
+        label_w,
+        CONTENT_W,
+        cells=5,
+        top_label="出勤時間",
+        bottom_label="名前",
+    )
     y -= 2 * mm
 
     # ---- 配置（名前×5 / 配置場所×5） ----
-    y = draw_name_place_grid(c, x0, y, "配置", label_w, CONTENT_W, cells=5)
+    y = draw_name_place_grid(
+        c,
+        x0,
+        y,
+        "配置",
+        label_w,
+        CONTENT_W,
+        cells=5,
+        top_label="名前",
+        bottom_label="配置場所",
+    )
     y -= 2 * mm
 
-    # ---- 特筆事項（5行） ----
+    # ---- 特筆事項（均一5マス） ----
     note_lines = 5
-    line_gap = 4.6 * mm
     label_h = 4.5 * mm
-    note_h = label_h + note_lines * line_gap + 0.8 * mm
+    row_h = 7.2 * mm  # 書きやすい高さ・均一
+    note_h = label_h + note_lines * row_h
     draw_rect(c, x0, y - note_h, CONTENT_W, note_h, stroke=0.9)
     c.setFillColorRGB(0.94, 0.94, 0.94)
     c.rect(x0, y - label_h, CONTENT_W, label_h, stroke=0, fill=1)
     c.setFillColorRGB(0, 0, 0)
     draw_hline(c, x0, x0 + CONTENT_W, y - label_h, stroke=0.6)
     left_text(c, "特筆事項", x0 + 2.5 * mm, y - 3.3 * mm, size=9)
-    for i in range(note_lines):
-        ly = y - label_h - (i + 1) * line_gap + 1.3 * mm
-        draw_hline(c, x0 + 3 * mm, x0 + CONTENT_W - 3 * mm, ly, stroke=0.4)
+    for i in range(1, note_lines):
+        ly = y - label_h - i * row_h
+        draw_hline(c, x0, x0 + CONTENT_W, ly, stroke=0.45)
     y -= note_h + 2 * mm
 
     # ---- 案内組数・客数合計 ----
