@@ -51,11 +51,22 @@ def left_text(c, text, x, y, font="JP", size=10):
 
 
 def draw_name_place_grid(
-    c, x0, y, title, label_w, content_w, cells=5, top_label="名前", bottom_label="配置場所"
+    c,
+    x0,
+    y,
+    title,
+    label_w,
+    content_w,
+    cells=5,
+    top_label="名前",
+    bottom_label="配置場所",
+    bottom_as_template=False,
+    top_h=None,
+    bottom_h=None,
 ):
     """左ラベル＋上段/下段の5マス表。戻り値は次の y（上端）。"""
-    top_h = 8.5 * mm
-    bottom_h = 8.5 * mm
+    top_h = 8.0 * mm if top_h is None else top_h
+    bottom_h = 8.0 * mm if bottom_h is None else bottom_h
     total_h = top_h + bottom_h
     grid_w = content_w - label_w
     cell_w = grid_w / cells
@@ -73,12 +84,26 @@ def draw_name_place_grid(
     draw_hline(c, x0 + label_w, x0 + content_w, y - top_h, stroke=0.55)
 
     # 縦マス区切り＋小ラベル
+    top_size = 5.5 if len(top_label) >= 5 else 6
+    bottom_size = 5.5 if len(bottom_label) >= 5 else 6
     for i in range(cells):
         cx = x0 + label_w + i * cell_w
         if i > 0:
             draw_vline(c, cx, y - total_h, y, stroke=0.5)
-        left_text(c, top_label, cx + 1.2 * mm, y - 3.2 * mm, size=6)
-        left_text(c, bottom_label, cx + 1.2 * mm, y - top_h - 3.2 * mm, size=6)
+        left_text(c, top_label, cx + 1.0 * mm, y - 3.0 * mm, size=top_size)
+        if bottom_as_template:
+            # 「　組　名」など手書き用テンプレートをマス中央付近に表示
+            centered_text(
+                c,
+                bottom_label,
+                cx + cell_w / 2,
+                y - top_h - bottom_h / 2 - 1.5 * mm,
+                size=8,
+            )
+        else:
+            left_text(
+                c, bottom_label, cx + 1.0 * mm, y - top_h - 3.0 * mm, size=bottom_size
+            )
 
     return y - total_h
 
@@ -158,7 +183,7 @@ def build():
     # ---- 特筆事項（均一5マス） ----
     note_lines = 5
     label_h = 4.5 * mm
-    row_h = 8.5 * mm  # 書きやすい高さ・均一
+    row_h = 7.5 * mm  # 書きやすい高さ・均一（達成店舗追加のためやや圧縮）
     note_h = label_h + note_lines * row_h
     draw_rect(c, x0, y - note_h, CONTENT_W, note_h, stroke=0.9)
     c.setFillColorRGB(0.94, 0.94, 0.94)
@@ -171,7 +196,7 @@ def build():
         draw_hline(c, x0, x0 + CONTENT_W, ly, stroke=0.45)
     y -= note_h + 2 * mm
 
-    # ---- 案内組数・客数合計 ----
+    # ---- 案内組数・客数合計（記入線なし） ----
     total_h = 9 * mm
     total_label_w = 38 * mm
     half = CONTENT_W / 2
@@ -185,9 +210,6 @@ def build():
     draw_vline(c, x0 + total_label_w, y - total_h, y, stroke=0.6)
     centered_text(
         c, "案内組数（合計）", x0 + total_label_w / 2, y - total_h / 2 - 1.5 * mm, size=8
-    )
-    draw_hline(
-        c, x0 + total_label_w + 4 * mm, x0 + half - 12 * mm, y - total_h / 2 - 1 * mm, stroke=0.5
     )
     left_text(c, "組", x0 + half - 9 * mm, y - total_h / 2 - 1.5 * mm, size=10)
 
@@ -203,15 +225,23 @@ def build():
         y - total_h / 2 - 1.5 * mm,
         size=8,
     )
-    draw_hline(
-        c,
-        x0 + half + total_label_w + 4 * mm,
-        x0 + CONTENT_W - 12 * mm,
-        y - total_h / 2 - 1 * mm,
-        stroke=0.5,
-    )
     left_text(c, "名", x0 + CONTENT_W - 9 * mm, y - total_h / 2 - 1.5 * mm, size=10)
     y -= total_h + 2 * mm
+
+    # ---- 達成店舗（店舗名 / 　組　名 × 5マス） ----
+    y = draw_name_place_grid(
+        c,
+        x0,
+        y,
+        "達成店舗",
+        label_w,
+        CONTENT_W,
+        cells=5,
+        top_label="達成店舗名",
+        bottom_label="　　組　　名",
+        bottom_as_template=True,
+    )
+    y -= 2 * mm
 
     # ---- 案内記録テーブル（15行） ----
     # カラム: No. | 時間 | 案内場所 | 対応者 | 対応場所
