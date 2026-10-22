@@ -50,6 +50,37 @@ def left_text(c, text, x, y, font="JP", size=10):
     c.drawString(x, y, text)
 
 
+def draw_name_place_grid(c, x0, y, title, label_w, content_w, cells=5):
+    """左ラベル＋名前/配置場所の5マス表。戻り値は次の y（上端）。"""
+    name_h = 8.5 * mm
+    place_h = 8.5 * mm
+    total_h = name_h + place_h
+    grid_w = content_w - label_w
+    cell_w = grid_w / cells
+
+    draw_rect(c, x0, y - total_h, content_w, total_h, stroke=0.9)
+
+    # 左ラベル
+    c.setFillColorRGB(0.94, 0.94, 0.94)
+    c.rect(x0, y - total_h, label_w, total_h, stroke=0, fill=1)
+    c.setFillColorRGB(0, 0, 0)
+    draw_vline(c, x0 + label_w, y - total_h, y, stroke=0.6)
+    centered_text(c, title, x0 + label_w / 2, y - total_h / 2 - 1.5 * mm, size=9)
+
+    # 名前行 / 配置場所行の区切り
+    draw_hline(c, x0 + label_w, x0 + content_w, y - name_h, stroke=0.55)
+
+    # 縦マス区切り＋小ラベル
+    for i in range(cells):
+        cx = x0 + label_w + i * cell_w
+        if i > 0:
+            draw_vline(c, cx, y - total_h, y, stroke=0.5)
+        left_text(c, "名前", cx + 1.2 * mm, y - 3.2 * mm, size=6)
+        left_text(c, "配置場所", cx + 1.2 * mm, y - name_h - 3.2 * mm, size=6)
+
+    return y - total_h
+
+
 def build():
     c = canvas.Canvas(OUTPUT, pagesize=A4)
     c.setTitle("営業日報 - wonderland")
@@ -59,11 +90,11 @@ def build():
     y = PAGE_H - MARGIN_T
 
     # ---- ヘッダー ----
-    title_h = 14 * mm
+    title_h = 12 * mm
     draw_rect(c, x0, y - title_h, CONTENT_W, title_h, stroke=1.2)
-    centered_text(c, "wonderland", x0 + CONTENT_W / 2, y - 6.2 * mm, size=16)
-    centered_text(c, "営 業 日 報", x0 + CONTENT_W / 2, y - 11.8 * mm, size=11)
-    y -= title_h + 3 * mm
+    centered_text(c, "wonderland", x0 + CONTENT_W / 2, y - 5.2 * mm, size=15)
+    centered_text(c, "営 業 日 報", x0 + CONTENT_W / 2, y - 10.2 * mm, size=10)
+    y -= title_h + 2.5 * mm
 
     # ---- 日付・記載者 ----
     meta_h = 10 * mm
@@ -86,65 +117,40 @@ def build():
         size=10,
     )
 
-    # 右：記載者
+    # 右：記載者（記入線なし・空白のみ）
     c.setFillColorRGB(0.94, 0.94, 0.94)
     c.rect(x0 + col_w, y - meta_h, label_w, meta_h, stroke=0, fill=1)
     c.setFillColorRGB(0, 0, 0)
     draw_vline(c, x0 + col_w + label_w, y - meta_h, y, stroke=0.6)
     centered_text(c, "記載者", x0 + col_w + label_w / 2, y - meta_h / 2 - 1.5 * mm, size=9)
-    draw_hline(
-        c,
-        x0 + col_w + label_w + 4 * mm,
-        x0 + CONTENT_W - 4 * mm,
-        y - meta_h / 2 - 1 * mm,
-        stroke=0.5,
-    )
-    y -= meta_h + 2.5 * mm
+    y -= meta_h + 2 * mm
 
-    # ---- 出勤者 ----
-    staff_h = 11 * mm
-    draw_rect(c, x0, y - staff_h, CONTENT_W, staff_h, stroke=0.9)
-    c.setFillColorRGB(0.94, 0.94, 0.94)
-    c.rect(x0, y - staff_h, label_w, staff_h, stroke=0, fill=1)
-    c.setFillColorRGB(0, 0, 0)
-    draw_vline(c, x0 + label_w, y - staff_h, y, stroke=0.6)
-    centered_text(c, "出勤者", x0 + label_w / 2, y - staff_h / 2 - 1.5 * mm, size=9)
-    for i in range(2):
-        ly = y - 4.5 * mm - i * 3.8 * mm
-        draw_hline(c, x0 + label_w + 3 * mm, x0 + CONTENT_W - 3 * mm, ly, stroke=0.4)
-    y -= staff_h + 2 * mm
+    # ---- 出勤者（名前×5 / 配置場所×5） ----
+    y = draw_name_place_grid(c, x0, y, "出勤者", label_w, CONTENT_W, cells=5)
+    y -= 2 * mm
 
-    # ---- 配置 ----
-    assign_h = 11 * mm
-    draw_rect(c, x0, y - assign_h, CONTENT_W, assign_h, stroke=0.9)
-    c.setFillColorRGB(0.94, 0.94, 0.94)
-    c.rect(x0, y - assign_h, label_w, assign_h, stroke=0, fill=1)
-    c.setFillColorRGB(0, 0, 0)
-    draw_vline(c, x0 + label_w, y - assign_h, y, stroke=0.6)
-    centered_text(c, "配置", x0 + label_w / 2, y - assign_h / 2 - 1.5 * mm, size=9)
-    for i in range(2):
-        ly = y - 4.5 * mm - i * 3.8 * mm
-        draw_hline(c, x0 + label_w + 3 * mm, x0 + CONTENT_W - 3 * mm, ly, stroke=0.4)
-    y -= assign_h + 2 * mm
+    # ---- 配置（名前×5 / 配置場所×5） ----
+    y = draw_name_place_grid(c, x0, y, "配置", label_w, CONTENT_W, cells=5)
+    y -= 2 * mm
 
     # ---- 特筆事項（5行） ----
     note_lines = 5
-    line_gap = 5.0 * mm
-    label_h = 5 * mm
-    note_h = label_h + note_lines * line_gap + 1 * mm
+    line_gap = 4.6 * mm
+    label_h = 4.5 * mm
+    note_h = label_h + note_lines * line_gap + 0.8 * mm
     draw_rect(c, x0, y - note_h, CONTENT_W, note_h, stroke=0.9)
     c.setFillColorRGB(0.94, 0.94, 0.94)
     c.rect(x0, y - label_h, CONTENT_W, label_h, stroke=0, fill=1)
     c.setFillColorRGB(0, 0, 0)
     draw_hline(c, x0, x0 + CONTENT_W, y - label_h, stroke=0.6)
-    left_text(c, "特筆事項", x0 + 2.5 * mm, y - 3.6 * mm, size=9)
+    left_text(c, "特筆事項", x0 + 2.5 * mm, y - 3.3 * mm, size=9)
     for i in range(note_lines):
-        ly = y - label_h - (i + 1) * line_gap + 1.5 * mm
+        ly = y - label_h - (i + 1) * line_gap + 1.3 * mm
         draw_hline(c, x0 + 3 * mm, x0 + CONTENT_W - 3 * mm, ly, stroke=0.4)
-    y -= note_h + 2.5 * mm
+    y -= note_h + 2 * mm
 
     # ---- 案内組数・客数合計 ----
-    total_h = 10 * mm
+    total_h = 9 * mm
     total_label_w = 38 * mm
     half = CONTENT_W / 2
     draw_rect(c, x0, y - total_h, CONTENT_W, total_h, stroke=0.9)
@@ -183,7 +189,7 @@ def build():
         stroke=0.5,
     )
     left_text(c, "名", x0 + CONTENT_W - 9 * mm, y - total_h / 2 - 1.5 * mm, size=10)
-    y -= total_h + 2.5 * mm
+    y -= total_h + 2 * mm
 
     # ---- 案内記録テーブル（15行） ----
     # カラム: No. | 時間 | 案内場所 | 対応者 | 対応場所
